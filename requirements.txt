@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+google-cloud-documentai
+google-genai
+python-multipart
