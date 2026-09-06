@@ -1,10 +1,20 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 from models.domain import ExtractedDocument, EventType 
 from services.audit_service import process_verified_document
 from db.memory import get_events_by_facility, get_events_by_medicine
 from services.ocr_service import process_document_gemini
 
 app = FastAPI(title="Health & Supply Chain API")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.post("/api/v1/documents/upload")
 async def upload_document(file: UploadFile = File(...)):

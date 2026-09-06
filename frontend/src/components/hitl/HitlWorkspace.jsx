@@ -1,0 +1,411 @@
+import React, { useState, useEffect } from 'react';
+import PanZoomViewer from './PanZoomViewer';
+import ConfidenceBadge from './ConfidenceBadge';
+import { verifyDocument } from '../../services/api';
+
+export default function HitlWorkspace({
+  documentData,
+  previewUrl,
+  activeFacility,
+  onCommitSuccess,
+  onViewAuditTrail,
+  onLoadSample,
+}) {
+  const [formData, setFormData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [commitResult, setCommitResult] = useState(null);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (documentData) {
+      // Clone extracted document data so modifications are local
+      setFormData(JSON.parse(JSON.stringify(documentData)));
+      setCommitResult(null);
+      setErrorMsg('');
+    }
+  }, [documentData]);
+
+  if (!formData) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-2xl mx-auto my-8 shadow-xs">
+        <div className="w-16 h-16 bg-amber-50 text-amber-600 rounded-2xl border border-amber-200 flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 m-0 mb-2">
+          HITL Review Buffer Empty
+        </h3>
+        <p className="text-xs text-slate-600 mb-6 max-w-md mx-auto">
+          No stock register document is currently loaded in the human review stage. Upload a register photo or load a sample demo record.
+        </p>
+        <div className="flex flex-wrap justify-center gap-3">
+          <button
+            onClick={() => onLoadSample(activeFacility)}
+            className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-sm flex items-center gap-2 cursor-pointer transition-all"
+          >
+            ⚡ Load Demo Register Sample ({activeFacility})
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Calculate if low confidence overall
+  const isLowConfidence = formData.requires_human_review || (formData.confidence_score || 1) < 0.90;
+
+  // Check client-side discrepancy (dispensed > received)
+  const discrepancies = (formData.records || []).filter(
+    (rec) => Number(rec.quantity_dispensed || 0) > Number(rec.quantity_received || 0)
+  );
+
+  const handleRecordChange = (index, field, value) => {
+    setFormData((prev) => {
+      const newRecords = [...prev.records];
+      newRecords[index] = {
+        ...newRecords[index],
+        [field]: field.startsWith('quantity') ? Math.max(0, parseInt(value, 10) || 0) : value,
+      };
+      return { ...prev, records: newRecords };
+    });
+  };
+
+  const handleAddField = () => {
+    setFormData((prev) => ({
+      ...prev,
+      records: [
+        ...prev.records,
+        {
+          medicine: 'ORS Packets 21.8g',
+          batch: 'B-' + Math.floor(100 + Math.random() * 900),
+          quantity_received: 50,
+          quantity_dispensed: 0,
+        },
+      ],
+    }));
+  };
+
+  const handleRemoveField = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      records: prev.records.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleHeaderChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmitVerification = async () => {
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      const res = await verifyDocument(formData);
+      setCommitResult(res);
+      if (onCommitSuccess) onCommitSuccess(res);
+    } catch (err) {
+      console.error('Verification commit error:', err);
+      setErrorMsg(err.message || 'Failed to verify and commit document');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 pb-8">
+      {/* Workspace Sub-header */}
+      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-amber-300 px-2 py-0.5 rounded">
+              Split-Screen Review Workspace
+            </span>
+            <span className="text-xs text-slate-500 font-mono">Doc ID: {formData.document_id}</span>
+          </div>
+          <h2 className="text-lg font-bold text-slate-900 m-0 mt-1">
+            Human-in-the-Loop Field Verification
+          </h2>
+        </div>
+
+        <ConfidenceBadge
+          confidenceScore={formData.confidence_score}
+          requiresHumanReview={formData.requires_human_review}
+        />
+      </div>
+
+      {/* Discrepancy Warning Banner (if dispensed > received) */}
+      {discrepancies.length > 0 && (
+        <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 text-amber-950 text-xs shadow-xs space-y-1">
+          <div className="flex items-center gap-2 font-bold text-amber-900 text-sm">
+            <span>⚠️ Discrepancy Warning Detected</span>
+          </div>
+          <p className="m-0 leading-relaxed text-slate-700">
+            The following medicine records specify <strong>Quantity Dispensed</strong> greater than <strong>Quantity Received</strong> in this transaction. Please cross-check against the register photo on the left:
+          </p>
+          <ul className="list-disc pl-5 font-semibold text-amber-900 m-0 mt-1 space-y-0.5">
+            {discrepancies.map((d, i) => (
+              <li key={i}>
+                {d.medicine} (Batch: {d.batch}): Received {d.quantity_received} vs Dispensed {d.quantity_dispensed}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Success Commitment Banner with 1-Click CTA to Audit Trail */}
+      {commitResult && (
+        <div className="bg-emerald-50 border-2 border-emerald-500 rounded-2xl p-6 text-emerald-950 shadow-md space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
+              ✓
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-emerald-900 m-0">
+                Document Verified & Immutable Ledger Updated!
+              </h3>
+              <p className="text-xs text-emerald-800 m-0 mt-0.5">
+                {commitResult.message} ({commitResult.details?.events_created || 0} events created)
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-emerald-200">
+            <span className="text-xs text-emerald-900 font-medium">
+              Audit events recorded under Facility: <strong>{formData.facility_id}</strong>
+            </span>
+            {/* 1-Click CTA button requested by user! */}
+            <button
+              onClick={() => onViewAuditTrail(formData.facility_id)}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>🔍 View Ledger Audit Trail for {formData.facility_id} &rarr;</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="bg-rose-50 border border-rose-300 text-rose-800 p-4 rounded-xl text-xs font-medium">
+          ❌ {errorMsg}
+        </div>
+      )}
+
+      {/* Main Split-Screen View */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Pane: Pan-and-Zoom Register Viewer */}
+        <div className="lg:col-span-5 space-y-2">
+          <PanZoomViewer imageUrl={previewUrl} documentId={formData.document_id} />
+        </div>
+
+        {/* Right Pane: Editable OCR Data Form */}
+        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-6">
+          <div className="space-y-6">
+            {/* Document Header Fields */}
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+              <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider m-0">
+                Document Metadata
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Facility ID:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.facility_id}
+                    onChange={(e) => handleHeaderChange('facility_id', e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Date:
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.date}
+                    onChange={(e) => handleHeaderChange('date', e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">
+                    Document Type:
+                  </label>
+                  <select
+                    value={formData.document_type}
+                    onChange={(e) => handleHeaderChange('document_type', e.target.value)}
+                    className="w-full bg-white border border-slate-300 rounded px-2.5 py-1.5 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+                  >
+                    <option value="stock_register">Stock Register</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Records Table Header & Actions */}
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider m-0 flex items-center gap-2">
+                  <span>Medicine Inventory Records</span>
+                  <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px]">
+                    {formData.records?.length || 0} items
+                  </span>
+                </h4>
+                <button
+                  onClick={handleAddField}
+                  className="bg-blue-50 hover:bg-blue-100 text-blue-800 font-semibold text-xs px-3 py-1 rounded-lg border border-blue-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <span>+ Add Row</span>
+                </button>
+              </div>
+
+              {/* Records List / Table */}
+              <div className="space-y-3">
+                {(formData.records || []).map((rec, idx) => {
+                  const hasDiscrepancy = Number(rec.quantity_dispensed || 0) > Number(rec.quantity_received || 0);
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`p-3.5 rounded-xl border transition-all ${
+                        isLowConfidence
+                          ? 'border-amber-400 bg-amber-50/30 shadow-xs'
+                          : hasDiscrepancy
+                          ? 'border-amber-400 bg-amber-50/20'
+                          : 'border-slate-200 bg-slate-50/50 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                        {/* Item Index / Low confidence badge */}
+                        <div className="sm:col-span-1 text-center">
+                          <span className="w-6 h-6 rounded-full bg-slate-200 text-slate-700 text-xs font-bold inline-flex items-center justify-center">
+                            {idx + 1}
+                          </span>
+                        </div>
+
+                        {/* Medicine Name */}
+                        <div className="sm:col-span-4">
+                          <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">
+                            Medicine Name
+                          </label>
+                          <input
+                            type="text"
+                            value={rec.medicine}
+                            onChange={(e) => handleRecordChange(idx, 'medicine', e.target.value)}
+                            className={`w-full bg-white rounded px-2.5 py-1.5 text-xs font-semibold text-slate-900 border focus:ring-2 focus:ring-blue-600 focus:outline-none ${
+                              isLowConfidence ? 'border-amber-400 focus:ring-amber-500' : 'border-slate-300'
+                            }`}
+                          />
+                        </div>
+
+                        {/* Batch Number */}
+                        <div className="sm:col-span-3">
+                          <label className="block text-[10px] uppercase font-bold text-slate-500 mb-0.5">
+                            Batch No
+                          </label>
+                          <input
+                            type="text"
+                            value={rec.batch}
+                            onChange={(e) => handleRecordChange(idx, 'batch', e.target.value)}
+                            className={`w-full bg-white rounded px-2.5 py-1.5 text-xs font-mono font-semibold text-slate-900 border focus:ring-2 focus:ring-blue-600 focus:outline-none ${
+                              isLowConfidence ? 'border-amber-400 focus:ring-amber-500' : 'border-slate-300'
+                            }`}
+                          />
+                        </div>
+
+                        {/* Qty Received */}
+                        <div className="sm:col-span-2">
+                          <label className="block text-[10px] uppercase font-bold text-blue-700 mb-0.5">
+                            Qty Recv
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={rec.quantity_received}
+                            onChange={(e) => handleRecordChange(idx, 'quantity_received', e.target.value)}
+                            className={`w-full bg-white rounded px-2 py-1.5 text-xs font-bold text-blue-900 border focus:ring-2 focus:ring-blue-600 focus:outline-none ${
+                              isLowConfidence ? 'border-amber-400' : 'border-slate-300'
+                            }`}
+                          />
+                        </div>
+
+                        {/* Qty Dispensed */}
+                        <div className="sm:col-span-2">
+                          <label className={`block text-[10px] uppercase font-bold mb-0.5 ${hasDiscrepancy ? 'text-amber-800 font-extrabold' : 'text-purple-700'}`}>
+                            Qty Disp
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="number"
+                              min="0"
+                              value={rec.quantity_dispensed}
+                              onChange={(e) => handleRecordChange(idx, 'quantity_dispensed', e.target.value)}
+                              className={`w-full bg-white rounded px-2 py-1.5 text-xs font-bold text-purple-900 border focus:ring-2 focus:ring-purple-600 focus:outline-none ${
+                                hasDiscrepancy ? 'border-2 border-amber-500 bg-amber-50' : 'border-slate-300'
+                              }`}
+                            />
+                            {hasDiscrepancy && (
+                              <span title="Quantity Dispensed exceeds Received" className="absolute -top-2 -right-1 text-xs">
+                                ⚠️
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row Actions */}
+                      <div className="flex justify-end pt-1 text-[11px]">
+                        <button
+                          onClick={() => handleRemoveField(idx)}
+                          className="text-rose-600 hover:text-rose-800 font-semibold hover:underline cursor-pointer"
+                        >
+                          Remove item
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Action Footer */}
+          <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div className="text-xs text-slate-500">
+              <span className="font-semibold text-slate-700">Health Worker Verification:</span> Cross-check against left image before committing.
+            </div>
+
+            <button
+              onClick={handleSubmitVerification}
+              disabled={isSubmitting || !!commitResult}
+              className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                commitResult
+                  ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                  : isSubmitting
+                  ? 'bg-emerald-800 text-white cursor-wait'
+                  : 'bg-emerald-700 hover:bg-emerald-800 text-white active:scale-95'
+              }`}
+            >
+              {isSubmitting ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Committing to Ledger...</span>
+                </>
+              ) : (
+                <>
+                  <span>✓ Verify & Commit to Ledger</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
