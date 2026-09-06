@@ -27,7 +27,7 @@ def process_document_gemini(file_bytes: bytes, filename: str) -> ExtractedDocume
     
     # 3. Call Gemini Flash with Structured Outputs
     response = client.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-3-flash-preview',
         contents=[image, prompt],
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
