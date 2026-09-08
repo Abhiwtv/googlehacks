@@ -14,6 +14,9 @@ class EventType(str, Enum):
     MEDICINE_RECEIVED = "MEDICINE_RECEIVED"
     MEDICINE_DISPENSED = "MEDICINE_DISPENSED"
     STOCK_ADJUSTED = "STOCK_ADJUSTED"
+    APPOINTMENT_CREATED = "APPOINTMENT_CREATED"
+    APPOINTMENT_COMPLETED = "APPOINTMENT_COMPLETED"
+    PRESCRIPTION_CREATED = "PRESCRIPTION_CREATED"
 
 class MedicineRecord(BaseModel):
     medicine: str
@@ -38,3 +41,31 @@ class AuditEvent(BaseModel):
     actor_id: str
     source_document_id: Optional[str] = None
     data: Dict[str, Any]
+
+class Patient(BaseModel):
+    patient_id: str = Field(default_factory=lambda: f"PAT-{uuid.uuid4().hex[:6].upper()}")
+    age: int
+    gender: str
+    locality: str  # Important for spatial mapping later!
+
+class PrescriptionItem(BaseModel):
+    medicine: str
+    quantity: int
+    dosage_instructions: str
+
+class Prescription(BaseModel):
+    prescription_id: str = Field(default_factory=lambda: f"RX-{uuid.uuid4().hex[:6].upper()}")
+    appointment_id: str
+    doctor_id: str
+    items: List[PrescriptionItem]
+    notes: Optional[str] = None
+
+class Appointment(BaseModel):
+    appointment_id: str = Field(default_factory=lambda: f"APT-{uuid.uuid4().hex[:6].upper()}")
+    facility_id: str
+    patient_id: str
+    doctor_id: str
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    symptoms: List[str]  # e.g., ["fever", "cough"] - Crucial for Disease Forecasting later!
+    diagnosis: Optional[str] = None
+    status: str = "OPEN" # OPEN or COMPLETED

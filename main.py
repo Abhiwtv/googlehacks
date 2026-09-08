@@ -4,6 +4,12 @@ from models.domain import ExtractedDocument, EventType
 from services.audit_service import process_verified_document
 from db.memory import get_events_by_facility, get_events_by_medicine
 from services.ocr_service import process_document_gemini
+from models.domain import Patient, Appointment, Prescription
+from services.clinical_service import (
+    register_patient, 
+    create_appointment, 
+    write_prescription_and_dispense
+)
 
 app = FastAPI(title="Health & Supply Chain API")
 
@@ -55,3 +61,25 @@ async def get_medicine_audit(facility_id: str, medicine: str):
     """
     events = get_events_by_medicine(facility_id, medicine)
     return {"facility_id": facility_id, "medicine": medicine, "events": events}
+
+@app.post("/api/v1/patients")
+async def api_register_patient(patient: Patient):
+    """Registers a new patient."""
+    return register_patient(patient)
+
+@app.post("/api/v1/appointments")
+async def api_create_appointment(appointment: Appointment):
+    """Creates an appointment (e.g., patient checks in at front desk)."""
+    return create_appointment(appointment)
+
+@app.post("/api/v1/prescriptions")
+async def api_write_prescription(prescription: Prescription, facility_id: str = "PHC-042"):
+    """
+    Doctor writes a prescription. 
+    This automatically deducts inventory and creates the audit link!
+    """
+    return write_prescription_and_dispense(
+        prescription=prescription, 
+        facility_id=facility_id, 
+        actor_id="DOC_01"
+    )
