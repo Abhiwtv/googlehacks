@@ -10,6 +10,9 @@ from services.clinical_service import (
     create_appointment, 
     write_prescription_and_dispense
 )
+from services.forecasting_service import generate_7_day_forecast
+from typing import Optional
+
 
 app = FastAPI(title="Health & Supply Chain API")
 
@@ -83,3 +86,10 @@ async def api_write_prescription(prescription: Prescription, facility_id: str = 
         facility_id=facility_id, 
         actor_id="DOC_01"
     )
+
+@app.get("/api/v1/analytics/forecast/{facility_id}")
+async def get_facility_forecast(facility_id: str):
+    """
+    Real ML Analytics Endpoint: Returns a 7-day forecast using Prophet.
+    """
+    return generate_7_day_forecast(facility_id)
