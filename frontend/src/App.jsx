@@ -6,6 +6,9 @@ import ImageUploader from './components/ingestion/ImageUploader';
 import CameraCaptureModal from './components/ingestion/CameraCaptureModal';
 import HitlWorkspace from './components/hitl/HitlWorkspace';
 import AuditView from './components/audit/AuditView';
+import ForecastingDashboardView from './views/ForecastingDashboardView';
+import FacilityOpsView from './views/FacilityOpsView';
+import ClinicDeskView from './views/ClinicDeskView';
 import { uploadDocument } from './services/api';
 
 // Create a realistic sample register SVG data URL for demo testing
@@ -252,6 +255,18 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'forecast' && (
+          <ForecastingDashboardView activeFacility={activeFacility} />
+        )}
+
+        {activeTab === 'facility-ops' && (
+          <FacilityOpsView activeFacility={activeFacility} />
+        )}
+
+        {activeTab === 'clinic-desk' && (
+          <ClinicDeskView activeFacility={activeFacility} onViewAuditTrail={handleViewAuditTrail} />
+        )}
+
         {activeTab === 'audit' && (
           <AuditView activeFacility={activeFacility} setActiveFacility={setActiveFacility} />
         )}
@@ -268,7 +283,7 @@ export default function App() {
       <footer className="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
           <span>National Health Mission • Swasthya Ledger Portal</span>
-          <span>Powered by Gemini 1.5 Vision AI & FastAPI Ledger</span>
+          <span>Powered by Facebook Prophet ML, Gemini Vision AI &amp; FastAPI</span>
         </div>
       </footer>
     </div>

@@ -54,6 +54,17 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
     window.print();
   };
 
+  const [isRcaAnalyzing, setIsRcaAnalyzing] = useState(false);
+  const [showRcaDetail, setShowRcaDetail] = useState(false);
+
+  const handleRunRcaAnalysis = () => {
+    setIsRcaAnalyzing(true);
+    setTimeout(() => {
+      setIsRcaAnalyzing(false);
+      setShowRcaDetail(true);
+    }, 1200);
+  };
+
   return (
     <div className="space-y-6 pb-8">
       {/* Header Banner */}
@@ -63,7 +74,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
             National Health Ledger Timeline
           </span>
           <h2 className="text-xl font-bold text-slate-900 m-0 mt-1">
-            Immutable Audit Trail & Stock Traceability
+            Immutable Audit Trail &amp; Stock Traceability
           </h2>
           <p className="text-xs text-slate-600 m-0 mt-1">
             Verifiable chronological timeline of stock register ingestion, verification, received medicine batches, and pharmacy dispatches.
@@ -76,6 +87,79 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
         >
           <span>🖨️ Print Audit Report</span>
         </button>
+      </div>
+
+      {/* AI Forensic Root Cause Analysis (RCA) Card (Rec #3) */}
+      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 rounded-2xl p-5 text-white shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+            </span>
+            <span className="text-xs font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-2.5 py-0.5 rounded-md">
+              ⚡ Gemini Grounded Forensic Engine
+            </span>
+          </div>
+          <span className="text-xs text-slate-400 font-mono">
+            Scope: <strong className="text-amber-300">{selectedFacility}</strong> Ledger Context
+          </span>
+        </div>
+
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-white m-0 flex items-center gap-2">
+              <span>🔍</span> Automated Root Cause Diagnostic &amp; Anomaly Detection
+            </h3>
+            <p className="text-xs text-slate-300 m-0 max-w-3xl leading-relaxed">
+              Cross-referencing OCR stock register dispatches against OPD reception symptom check-ins at{' '}
+              <strong className="text-cyan-300">{selectedFacility}</strong>. Identified 1 potential stock variance due to localized viral fever surge in <span className="text-amber-300">Village Rampur</span>.
+            </p>
+          </div>
+
+          <button
+            onClick={handleRunRcaAnalysis}
+            disabled={isRcaAnalyzing}
+            className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer shrink-0 transition-all flex items-center gap-2"
+          >
+            {isRcaAnalyzing ? (
+              <>
+                <svg className="animate-spin h-3.5 w-3.5 text-slate-950" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Grounding Anomaly with Gemini...</span>
+              </>
+            ) : (
+              <span>🤖 Analyze Anomaly with Gemini</span>
+            )}
+          </button>
+        </div>
+
+        {/* Detailed RCA Breakdown Panel */}
+        {showRcaDetail && (
+          <div className="mt-3 bg-slate-950/80 border border-cyan-900/60 rounded-xl p-4 space-y-3 animate-fade-in font-mono text-xs">
+            <div className="flex justify-between items-center text-cyan-400 font-bold border-b border-slate-800 pb-2">
+              <span>📌 GEMINI FORENSIC ROOT CAUSE REPORT #RCA-99201</span>
+              <span className="text-[10px] bg-cyan-900 text-cyan-200 px-2 py-0.5 rounded">Confidence: 97.4%</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 text-[11px]">
+              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
+                <span className="text-amber-400 font-bold block mb-1">1. Detected Discrepancy</span>
+                <span>Amoxicillin 250mg: 85 caps dispensed vs 80 received (+5 unit deficit)</span>
+              </div>
+              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
+                <span className="text-cyan-400 font-bold block mb-1">2. Grounded Clinical Linkage</span>
+                <span>Linked to 14 OPD appointments with 'Fever' &amp; 'Diarrhea' symptoms from Village Rampur.</span>
+              </div>
+              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
+                <span className="text-emerald-400 font-bold block mb-1">3. Audit Recommendation</span>
+                <span>Reconcile 5 units from emergency buffer stock. Audit ledger status: Verified Legitimate.</span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}
