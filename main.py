@@ -11,10 +11,19 @@ from services.clinical_service import (
     write_prescription_and_dispense
 )
 from services.forecasting_service import generate_7_day_forecast
+from services.rca_service import analyze_root_cause
+from pydantic import BaseModel
 from typing import Optional
 
 
 app = FastAPI(title="Health & Supply Chain API")
+
+class RCARequest(BaseModel):
+    facility_id: str = "PHC-042"
+    medicine: str = "Paracetamol 500mg Tablets"
+    weather_context: Optional[str] = None
+
+# (All existing routes remain intact below)
 
 app.add_middleware(
     CORSMiddleware,
@@ -93,3 +102,15 @@ async def get_facility_forecast(facility_id: str):
     Real ML Analytics Endpoint: Returns a 7-day forecast using Prophet.
     """
     return generate_7_day_forecast(facility_id)
+
+@app.post("/api/v1/analytics/rca")
+async def get_root_cause_analysis(req: RCARequest):
+    """
+    Feature 3: Grounded AI Root Cause Analysis (RCA) & Forensic Audit Engine using Gemini 2.5 Flash.
+    """
+    result = analyze_root_cause(
+        facility_id=req.facility_id,
+        medicine=req.medicine,
+        weather_context=req.weather_context
+    )
+    return {"status": "success", "rca": result}

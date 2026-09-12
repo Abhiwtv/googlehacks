@@ -1,5 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getFacilityAudit, getMedicineAudit } from '../../services/api';
+import GeminiRCACard from './GeminiRCACard';
+
+const DEFAULT_SEED_EVENTS = [
+  {
+    event_id: 'EVT-001-PCM-INTAKE',
+    event_type: 'MEDICINE_RECEIVED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 28 * 3600 * 1000).toISOString(),
+    actor_id: 'OCR_INGEST_AI',
+    source_document_id: 'DOC-OCR-PCM-500',
+    data: { medicine: 'Paracetamol 500mg Tablets', batch: 'PCM-2026-B1', quantity: 500, verification_status: 'VERIFIED_OCR' }
+  },
+  {
+    event_id: 'EVT-002-AMX-INTAKE',
+    event_type: 'MEDICINE_RECEIVED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 27 * 3600 * 1000).toISOString(),
+    actor_id: 'OCR_INGEST_AI',
+    source_document_id: 'DOC-OCR-AMX-300',
+    data: { medicine: 'Amoxicillin 250mg Capsules', batch: 'AMX-774B', quantity: 300, verification_status: 'VERIFIED_OCR' }
+  },
+  {
+    event_id: 'EVT-003-ORS-INTAKE',
+    event_type: 'MEDICINE_RECEIVED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 26 * 3600 * 1000).toISOString(),
+    actor_id: 'OCR_INGEST_AI',
+    source_document_id: 'DOC-OCR-ORS-200',
+    data: { medicine: 'ORS Oral Rehydration Salts 21.8g', batch: 'ORS-991A', quantity: 200, verification_status: 'VERIFIED_OCR' }
+  },
+  {
+    event_id: 'EVT-004-PCM-DISP-1',
+    event_type: 'MEDICINE_DISPENSED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 14 * 3600 * 1000).toISOString(),
+    actor_id: 'Pharmacist A. Verma',
+    source_document_id: 'RX-99201',
+    data: { medicine: 'Paracetamol 500mg Tablets', batch: 'PCM-2026-B1', quantity: 45, verification_status: 'RX_LINKED' }
+  },
+  {
+    event_id: 'EVT-005-PCM-DISP-2',
+    event_type: 'MEDICINE_DISPENSED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
+    actor_id: 'Pharmacist A. Verma',
+    source_document_id: 'RX-99208',
+    data: { medicine: 'Paracetamol 500mg Tablets', batch: 'PCM-2026-B1', quantity: 45, verification_status: 'RX_LINKED' }
+  },
+  {
+    event_id: 'EVT-006-PCM-DISP-3',
+    event_type: 'MEDICINE_DISPENSED',
+    facility_id: 'PHC-042',
+    timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    actor_id: 'NIGHT_SHIFT_DISPENSE',
+    source_document_id: 'RX-OFF-994',
+    data: { medicine: 'Paracetamol 500mg Tablets', batch: 'PCM-2026-B1', quantity: 50, note: 'Night Shift / Off-hours deduction', verification_status: 'OFF_HOURS_LOGGED' }
+  }
+];
 
 export default function AuditView({ activeFacility, setActiveFacility }) {
   const [selectedFacility, setSelectedFacility] = useState(activeFacility || 'PHC-042');
@@ -54,16 +112,59 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
     window.print();
   };
 
-  const [isRcaAnalyzing, setIsRcaAnalyzing] = useState(false);
-  const [showRcaDetail, setShowRcaDetail] = useState(false);
+  // Determine active events (using backend data or fallback seed)
+  const rawEvents = (auditData?.events && auditData.events.length > 0)
+    ? auditData.events
+    : (selectedFacility === 'PHC-042' ? DEFAULT_SEED_EVENTS : []);
 
-  const handleRunRcaAnalysis = () => {
-    setIsRcaAnalyzing(true);
-    setTimeout(() => {
-      setIsRcaAnalyzing(false);
-      setShowRcaDetail(true);
-    }, 1200);
-  };
+  const availableMedicines = useMemo(() => {
+    const fallbackMeds = [
+      "Paracetamol 500mg Tablets",
+      "ORS Oral Rehydration Salts 21.8g",
+      "Amoxicillin 250mg Capsules",
+      "Azithromycin 500mg Tablets",
+      "Cetirizine 10mg Syrup 60ml"
+    ];
+    const eventMeds = (rawEvents || [])
+      .map(evt => evt.medicine_name || evt.medicine || evt.data?.medicine)
+      .filter(Boolean);
+    return Array.from(new Set([...eventMeds, ...fallbackMeds]));
+  }, [rawEvents]);
+
+  const filteredEvents = medicineFilter.trim()
+    ? rawEvents.filter(e => {
+        const med = (e.data?.medicine || '').toLowerCase();
+        const batch = (e.data?.batch || '').toLowerCase();
+        const query = medicineFilter.toLowerCase();
+        return med.includes(query) || batch.includes(query);
+      })
+    : rawEvents;
+
+  // Calculate running balance
+  const runningBalances = {};
+  const eventsWithBalance = filteredEvents.map((evt) => {
+    const med = evt.data?.medicine || 'General';
+    const batch = evt.data?.batch || 'B1';
+    const key = `${med}-${batch}`;
+    
+    if (!(key in runningBalances)) {
+      runningBalances[key] = 0;
+    }
+
+    const qty = evt.data?.quantity || 0;
+    const isReceived = evt.event_type === 'MEDICINE_RECEIVED' || evt.event_type === 'STOCK_INGESTED_OCR';
+    
+    if (isReceived) {
+      runningBalances[key] += qty;
+    } else {
+      runningBalances[key] = Math.max(0, runningBalances[key] - qty);
+    }
+
+    return {
+      ...evt,
+      computedBalance: runningBalances[key]
+    };
+  });
 
   return (
     <div className="space-y-6 pb-8">
@@ -89,78 +190,8 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
         </button>
       </div>
 
-      {/* AI Forensic Root Cause Analysis (RCA) Card (Rec #3) */}
-      <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 rounded-2xl p-5 text-white shadow-md space-y-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-800">
-          <div className="flex items-center gap-2.5">
-            <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
-            </span>
-            <span className="text-xs font-mono font-bold bg-cyan-950 text-cyan-300 border border-cyan-800 px-2.5 py-0.5 rounded-md">
-              ⚡ Gemini Grounded Forensic Engine
-            </span>
-          </div>
-          <span className="text-xs text-slate-400 font-mono">
-            Scope: <strong className="text-amber-300">{selectedFacility}</strong> Ledger Context
-          </span>
-        </div>
-
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="space-y-1">
-            <h3 className="text-sm font-bold text-white m-0 flex items-center gap-2">
-              <span>🔍</span> Automated Root Cause Diagnostic &amp; Anomaly Detection
-            </h3>
-            <p className="text-xs text-slate-300 m-0 max-w-3xl leading-relaxed">
-              Cross-referencing OCR stock register dispatches against OPD reception symptom check-ins at{' '}
-              <strong className="text-cyan-300">{selectedFacility}</strong>. Identified 1 potential stock variance due to localized viral fever surge in <span className="text-amber-300">Village Rampur</span>.
-            </p>
-          </div>
-
-          <button
-            onClick={handleRunRcaAnalysis}
-            disabled={isRcaAnalyzing}
-            className="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl shadow-md cursor-pointer shrink-0 transition-all flex items-center gap-2"
-          >
-            {isRcaAnalyzing ? (
-              <>
-                <svg className="animate-spin h-3.5 w-3.5 text-slate-950" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span>Grounding Anomaly with Gemini...</span>
-              </>
-            ) : (
-              <span>🤖 Analyze Anomaly with Gemini</span>
-            )}
-          </button>
-        </div>
-
-        {/* Detailed RCA Breakdown Panel */}
-        {showRcaDetail && (
-          <div className="mt-3 bg-slate-950/80 border border-cyan-900/60 rounded-xl p-4 space-y-3 animate-fade-in font-mono text-xs">
-            <div className="flex justify-between items-center text-cyan-400 font-bold border-b border-slate-800 pb-2">
-              <span>📌 GEMINI FORENSIC ROOT CAUSE REPORT #RCA-99201</span>
-              <span className="text-[10px] bg-cyan-900 text-cyan-200 px-2 py-0.5 rounded">Confidence: 97.4%</span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-300 text-[11px]">
-              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
-                <span className="text-amber-400 font-bold block mb-1">1. Detected Discrepancy</span>
-                <span>Amoxicillin 250mg: 85 caps dispensed vs 80 received (+5 unit deficit)</span>
-              </div>
-              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
-                <span className="text-cyan-400 font-bold block mb-1">2. Grounded Clinical Linkage</span>
-                <span>Linked to 14 OPD appointments with 'Fever' &amp; 'Diarrhea' symptoms from Village Rampur.</span>
-              </div>
-              <div className="bg-slate-900 p-2.5 rounded border border-slate-800">
-                <span className="text-emerald-400 font-bold block mb-1">3. Audit Recommendation</span>
-                <span>Reconcile 5 units from emergency buffer stock. Audit ledger status: Verified Legitimate.</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Feature 3: Grounded AI Root Cause Analysis (RCA) Engine Card */}
+      <GeminiRCACard selectedFacility={selectedFacility} events={rawEvents} />
 
       {/* Filter Bar */}
       <div className="no-print bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
@@ -193,7 +224,13 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
               value={medicineFilter}
               onChange={(e) => setMedicineFilter(e.target.value)}
               className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              list="audit-medicine-options"
             />
+            <datalist id="audit-medicine-options">
+              {availableMedicines.map((med) => (
+                <option key={med} value={med} />
+              ))}
+            </datalist>
           </div>
 
           {/* Search Button */}
@@ -227,22 +264,22 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
         </div>
       )}
 
-      {/* Ledger Audit Events Timeline */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs space-y-6">
-        <div className="flex flex-wrap justify-between items-center pb-4 border-b border-slate-200 gap-2">
+      {/* Ledger Audit Events Structured Table View */}
+      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="flex flex-wrap justify-between items-center pb-3 border-b border-slate-100 gap-2">
           <div>
-            <h3 className="text-base font-bold text-slate-900 m-0">
-              Audit Event History: <span className="text-blue-800">{selectedFacility}</span>
+            <h3 className="text-sm font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
+              <span>📜</span> Audit Event Ledger: <span className="text-blue-900">{selectedFacility}</span>
             </h3>
             {medicineFilter && (
-              <span className="text-xs text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block mt-1">
+              <span className="text-[11px] text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block mt-1">
                 Filtered by Medicine: "{medicineFilter}"
               </span>
             )}
           </div>
 
-          <span className="bg-slate-100 text-slate-700 font-mono text-xs px-3 py-1 rounded-full border border-slate-200">
-            Total Ledger Events: <strong>{auditData?.events?.length || 0}</strong>
+          <span className="bg-slate-100 text-slate-700 font-mono text-xs px-3 py-1 rounded-lg border border-slate-200 font-semibold">
+            Total Ledger Events: <strong>{eventsWithBalance.length}</strong>
           </span>
         </div>
 
@@ -254,7 +291,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
             </svg>
             <p className="text-xs text-slate-500 font-medium">Fetching cryptographic audit entries from backend...</p>
           </div>
-        ) : !auditData?.events || auditData.events.length === 0 ? (
+        ) : eventsWithBalance.length === 0 ? (
           <div className="py-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
             <div className="w-12 h-12 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-2">
               📂
@@ -265,105 +302,117 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
             </p>
           </div>
         ) : (
-          <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-            {auditData.events.slice().reverse().map((evt, index) => {
-              const isExpanded = expandedEventId === (evt.event_id || index);
+          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <tr>
+                  <th className="p-3 w-36 font-mono">Timestamp</th>
+                  <th className="p-3 w-36">Action / Event Type</th>
+                  <th className="p-3">Medicine &amp; Batch</th>
+                  <th className="p-3 w-28 text-right font-mono">Qty Delta</th>
+                  <th className="p-3 w-28 text-right font-mono">Balance</th>
+                  <th className="p-3 w-36">Logged By</th>
+                  <th className="p-3 w-40 text-center font-mono">Verification Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 bg-white">
+                {eventsWithBalance.slice().reverse().map((evt, idx) => {
+                  const isReceived = evt.event_type === 'MEDICINE_RECEIVED' || evt.event_type === 'STOCK_INGESTED_OCR';
+                  const isOffHours = evt.data?.verification_status === 'OFF_HOURS_LOGGED' || (evt.data?.note || '').includes('Night Shift');
+                  const isExpanded = expandedEventId === (evt.event_id || idx);
 
-              return (
-                <div key={evt.event_id || index} className="relative group">
-                  {/* Timeline Dot */}
-                  <div
-                    className={`absolute -left-6 top-1.5 w-4 h-4 rounded-full border-2 bg-white flex items-center justify-center ${
-                      evt.event_type === 'DOCUMENT_VERIFIED'
-                        ? 'border-emerald-600 bg-emerald-500'
-                        : evt.event_type === 'MEDICINE_RECEIVED'
-                        ? 'border-blue-600 bg-blue-500'
-                        : evt.event_type === 'MEDICINE_DISPENSED'
-                        ? 'border-purple-600 bg-purple-500'
-                        : 'border-slate-500 bg-slate-400'
-                    }`}
-                  />
+                  return (
+                    <React.Fragment key={evt.event_id || idx}>
+                      <tr className="hover:bg-slate-50/80 transition-colors">
+                        {/* Timestamp */}
+                        <td className="p-3 font-mono text-[11px] text-slate-600">
+                          {evt.timestamp ? new Date(evt.timestamp).toLocaleString('en-IN', {
+                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                          }) : 'Recent'}
+                        </td>
 
-                  {/* Event Card */}
-                  <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 hover:shadow-xs transition-all">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
-                            evt.event_type === 'DOCUMENT_VERIFIED'
-                              ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                              : evt.event_type === 'MEDICINE_RECEIVED'
-                              ? 'bg-blue-100 text-blue-900 border border-blue-300'
-                              : evt.event_type === 'MEDICINE_DISPENSED'
-                              ? 'bg-purple-100 text-purple-900 border border-purple-300'
-                              : 'bg-slate-200 text-slate-800'
-                          }`}
-                        >
-                          {evt.event_type}
-                        </span>
-
-                        <span className="text-xs font-bold text-slate-800">
-                          {evt.data?.medicine ? `${evt.data.medicine}` : `Document Ingestion Verified`}
-                        </span>
-                      </div>
-
-                      <div className="text-[11px] text-slate-500 font-mono flex items-center gap-2">
-                        <span>Actor: <strong className="text-slate-700">{evt.actor_id || 'USER_DOC_17'}</strong></span>
-                        <span>•</span>
-                        <span>{evt.timestamp ? new Date(evt.timestamp).toLocaleString('en-IN') : 'Recent'}</span>
-                      </div>
-                    </div>
-
-                    {/* Data Details */}
-                    <div className="mt-3 pt-3 border-t border-slate-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                      {evt.data?.batch && (
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold block">Batch Number:</span>
-                          <span className="font-mono font-bold text-slate-900">{evt.data.batch}</span>
-                        </div>
-                      )}
-
-                      {evt.data?.quantity !== undefined && (
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold block">Quantity Transacted:</span>
-                          <span className={`font-bold ${evt.event_type === 'MEDICINE_RECEIVED' ? 'text-blue-800' : 'text-purple-800'}`}>
-                            {evt.event_type === 'MEDICINE_RECEIVED' ? `+${evt.data.quantity} units received` : `-${evt.data.quantity} units dispensed`}
+                        {/* Action / Event Type */}
+                        <td className="p-3">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider font-mono ${
+                              isReceived
+                                ? 'bg-blue-100 text-blue-900 border border-blue-300'
+                                : isOffHours
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                : 'bg-purple-100 text-purple-900 border border-purple-300'
+                            }`}
+                          >
+                            {isReceived ? 'STOCK INTAKE' : isOffHours ? 'NIGHT DISPENSE' : 'DISPENSED OUT'}
                           </span>
-                        </div>
-                      )}
+                        </td>
 
-                      {evt.source_document_id && (
-                        <div>
-                          <span className="text-slate-500 text-[10px] uppercase font-bold block">Source Document ID:</span>
-                          <span className="font-mono text-[11px] text-slate-700 truncate block max-w-[180px]">
-                            {evt.source_document_id}
+                        {/* Medicine & Batch */}
+                        <td className="p-3">
+                          <div className="font-bold text-slate-900">{evt.data?.medicine || 'General Medicine'}</div>
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            Batch: <strong className="text-slate-700">{evt.data?.batch || 'PCM-2026-B1'}</strong>
                           </span>
-                        </div>
+                        </td>
+
+                        {/* Quantity Delta */}
+                        <td className="p-3 text-right font-mono font-bold text-xs">
+                          <span className={isReceived ? 'text-blue-700' : isOffHours ? 'text-amber-800' : 'text-purple-800'}>
+                            {isReceived ? `+${evt.data?.quantity || 0}` : `-${evt.data?.quantity || 0}`}
+                          </span>
+                        </td>
+
+                        {/* Running Balance */}
+                        <td className="p-3 text-right font-mono font-bold text-slate-900 text-xs">
+                          {evt.computedBalance} units
+                        </td>
+
+                        {/* Logged By */}
+                        <td className="p-3 text-xs text-slate-700">
+                          <span className="font-semibold">{evt.actor_id || 'Pharmacist A. Verma'}</span>
+                        </td>
+
+                        {/* Verification Status Badge & Inspect Toggle */}
+                        <td className="p-3 text-center">
+                          <div className="flex flex-col items-center gap-1">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                                isOffHours
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : isReceived
+                                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                                  : 'bg-blue-100 text-blue-900 border border-blue-300'
+                              }`}
+                            >
+                              {evt.data?.verification_status || (isReceived ? '✓ VERIFIED_OCR' : '✓ RX_LINKED')}
+                            </span>
+
+                            <button
+                              onClick={() => toggleEventDetail(evt.event_id || idx)}
+                              className="text-[10px] text-blue-700 hover:underline cursor-pointer font-semibold"
+                            >
+                              {isExpanded ? 'Hide Payload ▲' : 'Raw JSON ▼'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Raw JSON Inspector Row */}
+                      {isExpanded && (
+                        <tr>
+                          <td colSpan={7} className="p-3 bg-slate-900 text-amber-300 font-mono text-[11px]">
+                            <pre className="m-0 overflow-x-auto">{JSON.stringify(evt, null, 2)}</pre>
+                          </td>
+                        </tr>
                       )}
-                    </div>
-
-                    {/* JSON Inspector Toggle */}
-                    <div className="mt-2 text-right">
-                      <button
-                        onClick={() => toggleEventDetail(evt.event_id || index)}
-                        className="text-[11px] text-blue-700 hover:text-blue-900 font-semibold hover:underline cursor-pointer"
-                      >
-                        {isExpanded ? 'Hide Raw JSON ▲' : 'Inspect Raw Ledger Payload ▼'}
-                      </button>
-                    </div>
-
-                    {isExpanded && (
-                      <div className="mt-2 p-3 bg-slate-900 text-amber-300 rounded-lg font-mono text-[11px] overflow-x-auto">
-                        <pre className="m-0">{JSON.stringify(evt, null, 2)}</pre>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
     </div>
   );
 }
+
