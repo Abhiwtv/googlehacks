@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from models.domain import ExtractedDocument, EventType 
@@ -13,6 +15,7 @@ from services.clinical_service import (
 from services.forecasting_service import generate_7_day_forecast
 from services.rca_service import analyze_root_cause
 from pydantic import BaseModel
+from services.spatial_service import detect_spatial_anomalies
 from typing import Optional
 
 
@@ -113,4 +116,47 @@ async def get_root_cause_analysis(req: RCARequest):
         medicine=req.medicine,
         weather_context=req.weather_context
     )
-    return {"status": "success", "rca": result}
+    return {"status": "success", "rca": result}
+
+@app.get("/api/v1/analytics/spatial-anomalies")
+async def api_get_spatial_anomalies(threshold: int = 3):
+    """
+    Feature 4: Scans the entire region for symptom clusters crossing the threshold.
+    Flags geographic disease clusters (Spatial Anomalies).
+    """
+    return detect_spatial_anomalies(anomaly_threshold=threshold)
+
+@app.post("/api/v1/dev/seed-spatial-data")
+async def seed_spatial_data():
+    """
+    DEV ONLY: Seeds the database with a mock outbreak in 'Andheri East' 
+    so you can instantly test the spatial anomaly detector.
+    """
+    from db.memory import save_patient, save_appointment
+    from models.domain import Patient, Appointment
+    import uuid
+    
+    # 1. Create 5 patients in "Andheri East" (The Outbreak Zone)
+    for i in range(5):
+        p = Patient(patient_id=f"PAT-ANDHERI-{i}", age=25, gender="M", locality="Andheri East")
+        save_patient(p)
+        save_appointment(Appointment(
+            appointment_id=f"APT-ANDHERI-{i}",
+            facility_id="PHC-001", 
+            patient_id=p.patient_id, 
+            doctor_id="DOC_01", 
+            symptoms=["fever", "diarrhea"]
+        ))
+        
+    # 2. Create 1 patient in "Bandra West" (The Normal Zone)
+    p2 = Patient(patient_id="PAT-BANDRA-1", age=30, gender="F", locality="Bandra West")
+    save_patient(p2)
+    save_appointment(Appointment(
+        appointment_id="APT-BANDRA-1",
+        facility_id="PHC-002", 
+        patient_id=p2.patient_id, 
+        doctor_id="DOC_01", 
+        symptoms=["headache"]
+    ))
+    
+    return {"message": "Mock spatial outbreak injected for Andheri East. Run the anomaly scan!"}
