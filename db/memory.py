@@ -121,3 +121,25 @@ def get_appointment(appointment_id: str) -> Optional[Appointment]:
 
 def save_prescription(rx: Prescription):
     _prescriptions.append(rx)
+
+def get_medicine_inventory_summary(facility_id: str, medicine: str):
+    events = get_events_by_medicine(facility_id, medicine)
+
+    received = sum(
+        e.data.get("quantity", 0)
+        for e in events
+        if e.event_type == EventType.MEDICINE_RECEIVED
+    )
+
+    dispensed = sum(
+        e.data.get("quantity", 0)
+        for e in events
+        if e.event_type == EventType.MEDICINE_DISPENSED
+    )
+
+    return {
+        "received": received,
+        "dispensed": dispensed,
+        "unaccounted": received - dispensed,
+        "events": events
+    }

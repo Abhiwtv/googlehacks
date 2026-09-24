@@ -42,11 +42,24 @@ class AuditEvent(BaseModel):
     source_document_id: Optional[str] = None
     data: Dict[str, Any]
 
+# Change from this:
+# patient_id: str = Field(default_factory=lambda: f"PAT-{uuid.uuid4().hex[:6].upper()}")
+
+# To this:
 class Patient(BaseModel):
     patient_id: str = Field(default_factory=lambda: f"PAT-{uuid.uuid4().hex[:6].upper()}")
     age: int
     gender: str
-    locality: str  # Important for spatial mapping later!
+    locality: str
+
+class Appointment(BaseModel):
+    appointment_id: Optional[str] = None
+    facility_id: str
+    patient_id: str
+    doctor_id: str
+    symptoms: List[str]
+    diagnosis: Optional[str] = None
+    status: str = "OPEN"
 
 class PrescriptionItem(BaseModel):
     medicine: str
@@ -54,18 +67,13 @@ class PrescriptionItem(BaseModel):
     dosage_instructions: str
 
 class Prescription(BaseModel):
-    prescription_id: str = Field(default_factory=lambda: f"RX-{uuid.uuid4().hex[:6].upper()}")
+    prescription_id: Optional[str] = None
     appointment_id: str
     doctor_id: str
     items: List[PrescriptionItem]
     notes: Optional[str] = None
 
-class Appointment(BaseModel):
-    appointment_id: str = Field(default_factory=lambda: f"APT-{uuid.uuid4().hex[:6].upper()}")
-    facility_id: str
-    patient_id: str
-    doctor_id: str
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    symptoms: List[str]  # e.g., ["fever", "cough"] - Crucial for Disease Forecasting later!
-    diagnosis: Optional[str] = None
-    status: str = "OPEN" # OPEN or COMPLETED
+class PatientCreate(BaseModel):
+    age: int
+    gender: str
+    locality: str

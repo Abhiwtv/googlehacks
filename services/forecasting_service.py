@@ -1,103 +1,125 @@
-import pandas as pd
-from prophet import Prophet
+import os
+import json
 from datetime import datetime, timedelta
 from typing import Dict, Any
+from google.cloud import bigquery
+# Ensure you have set the GOOGLE_APPLICATION_CREDENTIALS environment variable
+# to point to your GCP service account JSON file in production.
 
-def generate_historical_data(base_date: datetime, days: int = 90) -> pd.DataFrame:
+try:
+    from google.cloud import bigquery
+    bq_client = bigquery.Client()
+    BQ_AVAILABLE = True
+except Exception as e:
+    print(f"BigQuery Client not initialized (Local Dev Mode): {e}")
+    BQ_AVAILABLE = False
+
+
+def execute_bigquery_arima(facility_id: str) -> Dict[str, Any]:
     """
-    Since we don't have 3 months of data in our fresh database, 
-    we dynamically generate realistic historical time-series data to train the model.
+    Enterprise BigQuery ML Integration.
+    Executes a forecasting query against a pre-trained ARIMA_PLUS model inside GCP.
     """
-    dates = [base_date - timedelta(days=x) for x in range(days)]
+    # In GCP, the Datastream syncs PostgreSQL to BigQuery. 
+    # We then create a model in BigQuery using:
+    # CREATE OR REPLACE MODEL `health_data.facility_footfall_model`
+    # OPTIONS(model_type='ARIMA_PLUS', time_series_timestamp_col='date', time_series_data_col='patient_count')
     
-    # Generate realistic footfall with a weekly seasonality (weekends lower)
-    # and a recent upward trend (to give the model something to catch)
-    data = []
-    for d in dates:
-        base_footfall = 50
-        # Lower on weekends (Saturday=5, Sunday=6)
-        if d.weekday() >= 5:
-             base_footfall = 20
-             
-        # Add a recent spike in the last 7 days to trigger the ML trend
-        if (base_date - d).days < 7:
-             base_footfall += 30 
-             
-        data.append({"ds": d, "y": base_footfall})
+    query = f"""
+        SELECT
+            forecast_timestamp AS date,
+            forecast_value AS predicted_footfall,
+            prediction_interval_lower_bound AS confidence_lower,
+            prediction_interval_upper_bound AS confidence_upper
+        FROM
+            ML.FORECAST(MODEL `health_data.facility_footfall_model`,
+                        STRUCT(7 AS horizon, 0.9 AS confidence_level))
+        -- In a real multi-tenant setup, we would partition/filter by facility_id
+    """
+    
+    query_job = bq_client.query(query)
+    results = query_job.result()
+    
+    daily_breakdown = []
+    total_expected = 0
+    
+    for row in results:
+        # Convert BQ timestamp to string date
+        date_str = row.date.strftime('%Y-%m-%d')
+        footfall = int(row.predicted_footfall)
+        total_expected += footfall
         
-    df = pd.DataFrame(data)
-    # Prophet requires dates to be sorted oldest to newest
-    df = df.sort_values(by="ds").reset_index(drop=True) 
-    return df
-
-def run_prophet_forecast(df: pd.DataFrame, periods: int = 7) -> pd.DataFrame:
-    """
-    Trains a REAL Prophet ML model on the dataframe and predicts the future.
-    """
-    # 1. Initialize the Prophet Model
-    # We tell it to look for weekly seasonality (which is standard for clinics)
-    model = Prophet(yearly_seasonality=False, daily_seasonality=False, weekly_seasonality=True)
-    
-    # 2. Train the model
-    model.fit(df)
-    
-    # 3. Create a dataframe for the future dates
-    future = model.make_future_dataframe(periods=periods)
-    
-    # 4. Predict!
-    forecast = model.predict(future)
-    
-    # Return only the future predictions
-    return forecast.tail(periods)
-
-def generate_7_day_forecast(facility_id: str) -> Dict[str, Any]:
-    """
-    The main endpoint logic using real ML.
-    """
-    # 1. Get the current date
-    today = datetime.now()
-    
-    # 2. Get the historical data (Mocked here for 90 days, but formatted as a real DB pull)
-    df_history = generate_historical_data(today, days=90)
-    
-    # 3. Run the ML Model
-    try:
-        forecast_df = run_prophet_forecast(df_history, periods=7)
-    except Exception as e:
-        return {"error": f"ML Model failed to run: {str(e)}"}
-    
-    # 4. Extract the mathematical predictions
-    # Prophet gives us 'yhat' (the prediction), 'yhat_lower' (pessimistic), and 'yhat_upper' (optimistic)
-    daily_predictions = []
-    total_expected_footfall = 0
-    
-    for _, row in forecast_df.iterrows():
-        pred = int(max(0, row['yhat'])) # Ensure no negative footfall
-        total_expected_footfall += pred
-        
-        daily_predictions.append({
-            "date": row['ds'].strftime('%Y-%m-%d'),
-            "predicted_footfall": pred,
-            "confidence_lower": int(max(0, row['yhat_lower'])),
-            "confidence_upper": int(max(0, row['yhat_upper']))
+        daily_breakdown.append({
+            "date": date_str,
+            "predicted_footfall": footfall,
+            "confidence_lower": int(row.confidence_lower),
+            "confidence_upper": int(row.confidence_upper)
         })
         
-    # 5. Convert ML Footfall -> Medicine Demand (Using simple ratios for now)
-    # In a full production system, we would run a separate Prophet model for *each* medicine
-    medicine_demand = {
-        "Paracetamol": int(total_expected_footfall * 0.6),
-        "ORS": int(total_expected_footfall * 0.2),
-        "Amoxicillin": int(total_expected_footfall * 0.15)
-    }
-
     return {
         "facility_id": facility_id,
         "forecast_period_days": 7,
         "generated_at": datetime.utcnow().isoformat(),
-        "ml_model_used": "Facebook Prophet (Time-Series)",
+        "ml_model_used": "Google BigQuery ML (ARIMA_PLUS)",
         "predictions": {
-            "total_7_day_expected_footfall": total_expected_footfall,
-            "daily_breakdown": daily_predictions
+            "total_7_day_expected_footfall": total_expected,
+            "daily_breakdown": daily_breakdown
         },
-        "medicine_demand_forecast": medicine_demand
+        "medicine_demand_forecast": {
+            "Paracetamol": int(total_expected * 0.6),
+            "ORS": int(total_expected * 0.2),
+            "Amoxicillin": int(total_expected * 0.15)
+        }
+    }
+
+
+def generate_7_day_forecast(facility_id: str) -> Dict[str, Any]:
+    """
+    Executes a real forecasting query against a pre-trained ARIMA_PLUS model inside GCP.
+    """
+    # Replace YOUR_PROJECT_ID with your actual GCP Project ID!
+    query = f"""
+        SELECT
+            forecast_timestamp AS date,
+            forecast_value AS predicted_footfall,
+            prediction_interval_lower_bound AS confidence_lower,
+            prediction_interval_upper_bound AS confidence_upper
+        FROM
+            ML.FORECAST(MODEL `healthcare-ai-509518.health_data.facility_footfall_model`,
+                        STRUCT(7 AS horizon, 0.9 AS confidence_level))
+    """
+    
+    query_job = bq_client.query(query)
+    results = query_job.result()
+    
+    daily_breakdown = []
+    total_expected = 0
+    
+    for row in results:
+        # ML.FORECAST returns a datetime, we format it to string
+        date_str = row.date.strftime('%Y-%m-%d')
+        footfall = int(row.predicted_footfall)
+        total_expected += footfall
+        
+        daily_breakdown.append({
+            "date": date_str,
+            "predicted_footfall": footfall,
+            "confidence_lower": int(row.confidence_lower),
+            "confidence_upper": int(row.confidence_upper)
+        })
+        
+    return {
+        "facility_id": facility_id,
+        "forecast_period_days": 7,
+        "generated_at": datetime.utcnow().isoformat(),
+        "ml_model_used": "Google BigQuery ML (ARIMA_PLUS) - LIVE",
+        "predictions": {
+            "total_7_day_expected_footfall": total_expected,
+            "daily_breakdown": daily_breakdown
+        },
+        "medicine_demand_forecast": {
+            "Paracetamol": int(total_expected * 0.6),
+            "ORS": int(total_expected * 0.2),
+            "Amoxicillin": int(total_expected * 0.15)
+        }
     }

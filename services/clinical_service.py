@@ -1,43 +1,63 @@
-from models.domain import Patient, Appointment, Prescription, AuditEvent, EventType
-from db.memory import save_patient, save_appointment, save_prescription, save_audit_event, get_patient, get_appointment
+from sqlalchemy.ext.asyncio import AsyncSession
+from models.schema import PatientORM, AppointmentORM, AuditEventORM
+from models.domain import Patient, Appointment, Prescription, EventType
+import uuid
+import json
+from models.domain import PatientCreate
 
-def register_patient(patient: Patient) -> Patient:
-    """Registers a new patient."""
-    save_patient(patient)
-    return patient
+async def register_patient_db(patient_data: PatientCreate, db: AsyncSession) -> dict:
+    """Registers a new patient into the database."""
+    # Generate the ID here in the backend
+    new_id = f"PAT-{uuid.uuid4().hex[:6].upper()}"
+    
+    new_patient = PatientORM(
+        patient_id=new_id,
+        age=patient_data.age,
+        gender=patient_data.gender,
+        locality=patient_data.locality
+    )
+    db.add(new_patient)
+    await db.commit()
+    return {"status": "success", "patient_id": new_patient.patient_id}
 
-def create_appointment(appointment: Appointment, actor_id: str = "FRONT_DESK_1") -> Appointment:
-    """Creates an appointment and logs the event."""
+async def create_appointment_db(apt_data: Appointment, db: AsyncSession, actor_id: str = "FRONT_DESK_1") -> dict:
+    """Creates an appointment AND logs the audit event to the database."""
     # 1. Save the operational record
-    save_appointment(appointment)
+    new_apt = AppointmentORM(
+        appointment_id=apt_data.appointment_id or str(uuid.uuid4()),
+        facility_id=apt_data.facility_id,
+        patient_id=apt_data.patient_id,
+        doctor_id=apt_data.doctor_id,
+        symptoms=apt_data.symptoms,
+        diagnosis=apt_data.diagnosis
+    )
+    db.add(new_apt)
     
     # 2. Log the immutable event
-    event = AuditEvent(
+    event = AuditEventORM(
+        event_id=str(uuid.uuid4()),
         event_type=EventType.APPOINTMENT_CREATED,
-        facility_id=appointment.facility_id,
+        facility_id=apt_data.facility_id,
         actor_id=actor_id,
         data={
-            "appointment_id": appointment.appointment_id,
-            "patient_id": appointment.patient_id,
-            "symptoms": appointment.symptoms
+            "appointment_id": new_apt.appointment_id,
+            "patient_id": new_apt.patient_id,
+            "symptoms": new_apt.symptoms
         }
     )
-    save_audit_event(event)
-    
-    return appointment
+    db.add(event)
+    await db.commit()
+    return {"status": "success", "appointment_id": new_apt.appointment_id}
 
-def write_prescription_and_dispense(prescription: Prescription, facility_id: str, actor_id: str = "DOC_01") -> dict:
+async def write_prescription_and_dispense_db(prescription: Prescription, facility_id: str, db: AsyncSession, actor_id: str = "DOC_01") -> dict:
     """
-    The critical linking function. 
-    A doctor writes a prescription, which immediately triggers the medicine dispensing events.
+    Enterprise Traceability: A doctor writes a prescription, triggering automated database dispensing events.
     """
-    # 1. Save the prescription record
-    save_prescription(prescription)
+    events_created = 0
     
-    events_created = []
-    
-    # 2. Log that the prescription was created
-    rx_event = AuditEvent(
+    # 1. Log that the prescription was created
+    rx_event = AuditEventORM(
+        event_id=str(uuid.uuid4()),
         event_type=EventType.PRESCRIPTION_CREATED,
         facility_id=facility_id,
         actor_id=actor_id,
@@ -47,12 +67,13 @@ def write_prescription_and_dispense(prescription: Prescription, facility_id: str
             "items": [{"medicine": i.medicine, "quantity": i.quantity} for i in prescription.items]
         }
     )
-    save_audit_event(rx_event)
-    events_created.append(rx_event)
+    db.add(rx_event)
+    events_created += 1
     
-    # 3. CRITICAL: Automatically dispense the medicine and link it back to the prescription
+    # 2. CRITICAL: Automatically dispense the medicine and link it back to the prescription
     for item in prescription.items:
-        dispense_event = AuditEvent(
+        dispense_event = AuditEventORM(
+            event_id=str(uuid.uuid4()),
             event_type=EventType.MEDICINE_DISPENSED,
             facility_id=facility_id,
             actor_id=actor_id,
@@ -63,10 +84,8 @@ def write_prescription_and_dispense(prescription: Prescription, facility_id: str
                 "appointment_id": prescription.appointment_id    # The Link!
             }
         )
-        save_audit_event(dispense_event)
-        events_created.append(dispense_event)
+        db.add(dispense_event)
+        events_created += 1
         
-    return {
-        "prescription": prescription,
-        "audit_events": events_created
-    }
+    await db.commit()
+    return {"status": "success", "prescription_id": prescription.prescription_id, "events_created": events_created}

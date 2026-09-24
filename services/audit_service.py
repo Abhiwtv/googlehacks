@@ -1,13 +1,17 @@
-from models.domain import ExtractedDocument, AuditEvent, EventType
-from db.memory import save_audit_event
+from sqlalchemy.ext.asyncio import AsyncSession
+from models.schema import AuditEventORM
+from models.domain import ExtractedDocument, EventType
+import uuid
 
-def process_verified_document(doc: ExtractedDocument, actor_id: str = "SYSTEM"):
+async def process_verified_document_db(doc: ExtractedDocument, db: AsyncSession, actor_id: str = "SYSTEM"):
     """
-    Takes a confirmed document and generates the appropriate audit events.
+    Takes a confirmed OCR document and generates the appropriate database audit events.
     """
+    events_created = 0
     
     # 1. Log that the document itself was verified
-    doc_event = AuditEvent(
+    doc_event = AuditEventORM(
+        event_id=str(uuid.uuid4()),
         event_type=EventType.DOCUMENT_VERIFIED,
         facility_id=doc.facility_id,
         actor_id=actor_id,
@@ -17,12 +21,14 @@ def process_verified_document(doc: ExtractedDocument, actor_id: str = "SYSTEM"):
             "date": doc.date
         }
     )
-    save_audit_event(doc_event)
+    db.add(doc_event)
+    events_created += 1
     
     # 2. For a Stock Register, break out individual medicine events
     for record in doc.records:
         if record.quantity_received > 0:
-            recv_event = AuditEvent(
+            recv_event = AuditEventORM(
+                event_id=str(uuid.uuid4()),
                 event_type=EventType.MEDICINE_RECEIVED,
                 facility_id=doc.facility_id,
                 actor_id=actor_id,
@@ -33,10 +39,12 @@ def process_verified_document(doc: ExtractedDocument, actor_id: str = "SYSTEM"):
                     "quantity": record.quantity_received
                 }
             )
-            save_audit_event(recv_event)
+            db.add(recv_event)
+            events_created += 1
             
         if record.quantity_dispensed > 0:
-            disp_event = AuditEvent(
+            disp_event = AuditEventORM(
+                event_id=str(uuid.uuid4()),
                 event_type=EventType.MEDICINE_DISPENSED,
                 facility_id=doc.facility_id,
                 actor_id=actor_id,
@@ -47,6 +55,8 @@ def process_verified_document(doc: ExtractedDocument, actor_id: str = "SYSTEM"):
                     "quantity": record.quantity_dispensed
                 }
             )
-            save_audit_event(disp_event)
+            db.add(disp_event)
+            events_created += 1
             
-    return {"status": "success", "events_created": len(doc.records) * 2 + 1}
+    await db.commit()
+    return {"status": "success", "events_created": events_created}
