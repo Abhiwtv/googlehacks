@@ -167,24 +167,24 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
   });
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-8 pb-8 bg-white">
       {/* Header Banner */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-900 text-blue-200 px-2 py-0.5 rounded">
+      <div className="bg-white border-b border-slate-200 pb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="space-y-1.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm font-mono">
             National Health Ledger Timeline
           </span>
-          <h2 className="text-xl font-bold text-slate-900 m-0 mt-1">
+          <h2 className="text-2xl font-extrabold text-slate-900 m-0 tracking-tight">
             Immutable Audit Trail &amp; Stock Traceability
           </h2>
-          <p className="text-xs text-slate-600 m-0 mt-1">
+          <p className="text-xs text-slate-500 m-0">
             Verifiable chronological timeline of stock register ingestion, verification, received medicine batches, and pharmacy dispatches.
           </p>
         </div>
 
         <button
           onClick={handlePrint}
-          className="no-print bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs px-4 py-2 rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0 transition-all"
+          className="no-print border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs px-4 py-2 rounded-md flex items-center gap-1.5 cursor-pointer shrink-0 transition"
         >
           <span>🖨️ Print Audit Report</span>
         </button>
@@ -194,17 +194,17 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
       <GeminiRCACard selectedFacility={selectedFacility} events={rawEvents} />
 
       {/* Filter Bar */}
-      <div className="no-print bg-white rounded-xl border border-slate-200 p-4 shadow-xs">
+      <div className="no-print bg-white rounded-md border border-slate-200 p-4">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
           {/* Facility Selector */}
           <div className="sm:col-span-5">
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
               Select Health Facility:
             </label>
             <select
               value={selectedFacility}
               onChange={(e) => handleFacilityChange(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none cursor-pointer"
+              className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs font-medium text-slate-800 focus:ring-1 focus:ring-slate-900 focus:outline-none cursor-pointer"
             >
               <option value="PHC-042">Primary Health Centre (PHC-042)</option>
               <option value="CHC-101">Community Health Centre (CHC-101)</option>
@@ -215,7 +215,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
 
           {/* Medicine Search Input */}
           <div className="sm:col-span-5">
-            <label className="block text-xs font-bold text-slate-700 mb-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
               Filter by Medicine Name / Batch:
             </label>
             <input
@@ -223,7 +223,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
               placeholder="e.g. Paracetamol 500mg, ORS, Amoxicillin..."
               value={medicineFilter}
               onChange={(e) => setMedicineFilter(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-800 focus:ring-2 focus:ring-blue-600 focus:outline-none"
+              className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 text-xs text-slate-800 focus:ring-1 focus:ring-slate-900 focus:outline-none"
               list="audit-medicine-options"
             />
             <datalist id="audit-medicine-options">
@@ -237,7 +237,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
           <div className="sm:col-span-2 flex gap-2">
             <button
               type="submit"
-              className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold text-xs py-2 rounded-lg shadow-2xs transition-all cursor-pointer"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2 rounded-md transition cursor-pointer"
             >
               Search
             </button>
@@ -248,7 +248,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
                   setMedicineFilter('');
                   fetchAuditTrail();
                 }}
-                className="bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-3 py-2 rounded-lg cursor-pointer"
+                className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold text-xs px-3 py-2 rounded-md cursor-pointer"
                 title="Clear Filter"
               >
                 ✕
@@ -259,40 +259,40 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
       </div>
 
       {errorMsg && (
-        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-xl text-xs font-medium">
+        <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-md text-xs font-semibold">
           ❌ {errorMsg}
         </div>
       )}
 
       {/* Ledger Audit Events Structured Table View */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
-        <div className="flex flex-wrap justify-between items-center pb-3 border-b border-slate-100 gap-2">
+      <div className="bg-white border-t border-slate-200 pt-6 space-y-4">
+        <div className="flex flex-wrap justify-between items-center pb-3 border-b border-slate-200 gap-2">
           <div>
-            <h3 className="text-sm font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
-              <span>📜</span> Audit Event Ledger: <span className="text-blue-900">{selectedFacility}</span>
+            <h3 className="text-base font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
+              <span>📜</span> Audit Event Ledger: <span className="text-slate-900 font-extrabold">{selectedFacility}</span>
             </h3>
             {medicineFilter && (
-              <span className="text-[11px] text-amber-800 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 inline-block mt-1">
+              <span className="text-[11px] text-amber-900 font-semibold bg-amber-50 px-2.5 py-0.5 rounded-sm border border-amber-200 inline-block mt-1">
                 Filtered by Medicine: "{medicineFilter}"
               </span>
             )}
           </div>
 
-          <span className="bg-slate-100 text-slate-700 font-mono text-xs px-3 py-1 rounded-lg border border-slate-200 font-semibold">
+          <span className="bg-slate-100 text-slate-700 font-mono text-xs px-3 py-1 rounded-sm border border-slate-200 font-semibold">
             Total Ledger Events: <strong>{eventsWithBalance.length}</strong>
           </span>
         </div>
 
         {loading ? (
           <div className="py-12 text-center space-y-3">
-            <svg className="animate-spin h-8 w-8 text-blue-700 mx-auto" fill="none" viewBox="0 0 24 24">
+            <svg className="animate-spin h-8 w-8 text-slate-900 mx-auto" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
             <p className="text-xs text-slate-500 font-medium">Fetching cryptographic audit entries from backend...</p>
           </div>
         ) : eventsWithBalance.length === 0 ? (
-          <div className="py-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200">
+          <div className="py-12 text-center bg-slate-50 rounded-md border border-dashed border-slate-200">
             <div className="w-12 h-12 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center mx-auto mb-2">
               📂
             </div>
@@ -302,9 +302,9 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
             </p>
           </div>
         ) : (
-          <div className="border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+          <div className="border border-slate-200 rounded-md overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200 uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="p-3 w-36 font-mono">Timestamp</th>
                   <th className="p-3 w-36">Action / Event Type</th>
@@ -315,7 +315,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
                   <th className="p-3 w-40 text-center font-mono">Verification Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-200 bg-white">
                 {eventsWithBalance.slice().reverse().map((evt, idx) => {
                   const isReceived = evt.event_type === 'MEDICINE_RECEIVED' || evt.event_type === 'STOCK_INGESTED_OCR';
                   const isOffHours = evt.data?.verification_status === 'OFF_HOURS_LOGGED' || (evt.data?.note || '').includes('Night Shift');
@@ -323,9 +323,9 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
 
                   return (
                     <React.Fragment key={evt.event_id || idx}>
-                      <tr className="hover:bg-slate-50/80 transition-colors">
+                      <tr className="hover:bg-slate-50 transition-colors">
                         {/* Timestamp */}
-                        <td className="p-3 font-mono text-[11px] text-slate-600">
+                        <td className="p-3 font-mono text-[11px] text-slate-500">
                           {evt.timestamp ? new Date(evt.timestamp).toLocaleString('en-IN', {
                             day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
                           }) : 'Recent'}
@@ -334,12 +334,12 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
                         {/* Action / Event Type */}
                         <td className="p-3">
                           <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider font-mono ${
+                            className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase tracking-wider font-mono border ${
                               isReceived
-                                ? 'bg-blue-100 text-blue-900 border border-blue-300'
+                                ? 'bg-slate-100 text-slate-800 border-slate-300'
                                 : isOffHours
-                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                                : 'bg-purple-100 text-purple-900 border border-purple-300'
+                                ? 'bg-amber-50 text-amber-900 border-amber-200'
+                                : 'bg-slate-100 text-slate-700 border-slate-300'
                             }`}
                           >
                             {isReceived ? 'STOCK INTAKE' : isOffHours ? 'NIGHT DISPENSE' : 'DISPENSED OUT'}
@@ -356,7 +356,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
 
                         {/* Quantity Delta */}
                         <td className="p-3 text-right font-mono font-bold text-xs">
-                          <span className={isReceived ? 'text-blue-700' : isOffHours ? 'text-amber-800' : 'text-purple-800'}>
+                          <span className={isReceived ? 'text-slate-900' : isOffHours ? 'text-amber-900' : 'text-slate-700'}>
                             {isReceived ? `+${evt.data?.quantity || 0}` : `-${evt.data?.quantity || 0}`}
                           </span>
                         </td>
@@ -375,12 +375,12 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
                         <td className="p-3 text-center">
                           <div className="flex flex-col items-center gap-1">
                             <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                              className={`px-2 py-0.5 rounded-sm text-[10px] font-bold uppercase font-mono border ${
                                 isOffHours
-                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  ? 'bg-amber-50 text-amber-900 border-amber-200'
                                   : isReceived
-                                  ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
-                                  : 'bg-blue-100 text-blue-900 border border-blue-300'
+                                  ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+                                  : 'bg-slate-100 text-slate-800 border-slate-300'
                               }`}
                             >
                               {evt.data?.verification_status || (isReceived ? '✓ VERIFIED_OCR' : '✓ RX_LINKED')}
@@ -388,7 +388,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
 
                             <button
                               onClick={() => toggleEventDetail(evt.event_id || idx)}
-                              className="text-[10px] text-blue-700 hover:underline cursor-pointer font-semibold"
+                              className="text-[10px] text-slate-600 hover:text-slate-900 underline cursor-pointer font-semibold"
                             >
                               {isExpanded ? 'Hide Payload ▲' : 'Raw JSON ▼'}
                             </button>
@@ -399,7 +399,7 @@ export default function AuditView({ activeFacility, setActiveFacility }) {
                       {/* Raw JSON Inspector Row */}
                       {isExpanded && (
                         <tr>
-                          <td colSpan={7} className="p-3 bg-slate-900 text-amber-300 font-mono text-[11px]">
+                          <td colSpan={7} className="p-3 bg-slate-900 text-slate-100 font-mono text-[11px]">
                             <pre className="m-0 overflow-x-auto">{JSON.stringify(evt, null, 2)}</pre>
                           </td>
                         </tr>

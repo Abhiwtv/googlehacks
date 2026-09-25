@@ -19,10 +19,12 @@ from services.notification_service import process_and_dispatch_alerts, get_all_a
 from services.spatial_service import detect_spatial_anomalies
 from services.rca_service import analyze_root_cause
 from contextlib import asynccontextmanager
-from db.database import engine, Base
+from db.database import engine, Base, get_db
 from fastapi import Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-from db.database import get_db
+try:
+    from sqlalchemy.ext.asyncio import AsyncSession
+except Exception:
+    AsyncSession = None
 
 from services.clinical_service import register_patient_db, create_appointment_db, write_prescription_and_dispense_db
 from services.audit_service import process_verified_document_db
@@ -30,12 +32,20 @@ from models.domain import PatientCreate
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # On Startup: Create all tables in the database (if they don't exist)
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    # On Startup: Create all tables in the database (if engine and Base exist)
+    if engine and Base:
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
+        except Exception as e:
+            print(f"Database table creation notice ({e}), running in-memory mode.")
     yield
     # On Shutdown: Close connection pool
-    await engine.dispose()
+    if engine:
+        try:
+            await engine.dispose()
+        except Exception as e:
+            pass
 
 app = FastAPI(title="Enterprise Health API", lifespan=lifespan)
 

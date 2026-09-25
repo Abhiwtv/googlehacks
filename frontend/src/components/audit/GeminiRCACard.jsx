@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { fetchRCAAnalysis } from '../../services/api';
 
 export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [] }) {
@@ -6,7 +6,8 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
   const [rcaData, setRcaData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [hasRunInitial, setHasRunInitial] = useState(false);
+
+  const rcaResult = rcaData;
 
   const availableMedicines = useMemo(() => {
     // Comprehensive fallback list including all standard stock catalog items
@@ -30,76 +31,38 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
   const handleRunRca = async (med = selectedMedicine) => {
     setLoading(true);
     setError('');
-    setHasRunInitial(true);
+    setRcaData(null); // Clear previous results while analyzing
     try {
       const data = await fetchRCAAnalysis(selectedFacility, med);
       setRcaData(data);
     } catch (err) {
       console.error('RCA Analysis fetch error:', err);
-      setError('Failed to complete Gemini forensic cross-audit');
+      setError(err.message || 'Failed to complete Gemini forensic cross-audit');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    handleRunRca(selectedMedicine);
-  }, [selectedFacility]);
+  const fraudRiskPct = rcaResult?.fraud_risk_score !== undefined
+    ? Math.round(rcaResult.fraud_risk_score * 100)
+    : (rcaResult?.verdict === "SUSPECTED_PHANTOM_LEAKAGE" || rcaResult?.verdict === "UNEXPLAINED_LOSS" ? 88 : 0);
 
-  // Color helper for Verdict banner & badges (Light Theme)
-  const getVerdictStyle = (verdict) => {
-    switch (verdict) {
-      case 'LEGITIMATE_SURGE':
-        return {
-          cardBg: 'bg-emerald-50/80 border-emerald-200 text-emerald-900',
-          badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-          icon: '✓',
-          label: 'LEGITIMATE SURGE',
-        };
-      case 'SUSPECTED_PHANTOM_LEAKAGE':
-        return {
-          cardBg: 'bg-rose-50/90 border-rose-200 text-rose-950',
-          badgeBg: 'bg-rose-100 text-rose-800 border-rose-300 font-bold animate-pulse',
-          icon: '🚨',
-          label: 'SUSPECTED PHANTOM LEAKAGE',
-        };
-      case 'OFF_HOURS_TAMPERING':
-        return {
-          cardBg: 'bg-purple-50/80 border-purple-200 text-purple-900',
-          badgeBg: 'bg-purple-100 text-purple-800 border-purple-300',
-          icon: '⚠️',
-          label: 'OFF-HOURS TAMPERING DETECTED',
-        };
-      case 'OVER_DISPENSING':
-      default:
-        return {
-          cardBg: 'bg-amber-50/80 border-amber-200 text-amber-900',
-          badgeBg: 'bg-amber-100 text-amber-800 border-amber-300',
-          icon: '⚠️',
-          label: 'CLINICAL OVER-DISPENSING',
-        };
-    }
-  };
-
-  const verdictInfo = getVerdictStyle(rcaData?.verdict);
-  const fraudRiskPct = Math.round((rcaData?.fraud_risk_score || 0) * 100);
-  const confidencePct = Math.round((rcaData?.confidence_score || 0.95) * 100);
-  const unaccountedUnits = rcaData?.discrepancy_delta?.unaccounted_units || 0;
+  const confidencePct = Math.round((rcaResult?.confidence_score ?? 0.95) * 100);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-xs text-slate-800 space-y-4 transition-all duration-300 ease-in-out">
+    <div className="bg-white border-t border-slate-200 pt-6 text-slate-900 space-y-6">
       {/* Top Controls Bar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100">
-        <div className="space-y-1">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-4 border-b border-slate-200">
+        <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="bg-blue-900 text-amber-300 font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider font-mono border border-blue-800">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm font-mono">
               ⚡ Gemini 2.5 Flash Grounded
             </span>
-            <span className="bg-blue-50 text-blue-900 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-mono font-semibold">
+            <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-sm">
               Scope: {selectedFacility}
             </span>
           </div>
-          <h3 className="text-sm font-bold text-slate-900 m-0 tracking-tight flex items-center gap-2">
+          <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2 m-0">
             <span>✨</span> AI Grounded Root Cause Analysis &amp; Forensic Cross-Audit
           </h3>
         </div>
@@ -110,9 +73,8 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
             value={selectedMedicine}
             onChange={(e) => {
               setSelectedMedicine(e.target.value);
-              handleRunRca(e.target.value);
             }}
-            className="bg-slate-50 border border-slate-300 text-slate-800 text-xs rounded-lg px-3 py-2 font-semibold focus:ring-2 focus:ring-blue-600 focus:outline-none cursor-pointer"
+            className="bg-white border border-slate-300 text-slate-800 text-xs rounded-md px-3 py-2 font-medium focus:ring-1 focus:ring-slate-900 focus:outline-none cursor-pointer"
           >
             {availableMedicines.map((med) => (
               <option key={med} value={med}>{med}</option>
@@ -122,7 +84,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
           <button
             onClick={() => handleRunRca(selectedMedicine)}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs px-4 py-2 rounded-lg shadow-xs transition active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
           >
             {loading ? (
               <>
@@ -141,46 +103,62 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
 
       {/* Loading Skeleton State */}
       {loading ? (
-        <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 space-y-4 animate-pulse">
-          <div className="h-14 bg-slate-200/70 rounded-lg w-full"></div>
+        <div className="bg-slate-50 border border-slate-200 rounded-md p-5 space-y-4 animate-pulse">
+          <div className="h-14 bg-slate-200/70 rounded-md w-full"></div>
           <div className="grid grid-cols-3 gap-3">
-            <div className="h-16 bg-slate-200/70 rounded-lg"></div>
-            <div className="h-16 bg-slate-200/70 rounded-lg"></div>
-            <div className="h-16 bg-slate-200/70 rounded-lg"></div>
+            <div className="h-16 bg-slate-200/70 rounded-md"></div>
+            <div className="h-16 bg-slate-200/70 rounded-md"></div>
+            <div className="h-16 bg-slate-200/70 rounded-md"></div>
           </div>
-          <div className="h-20 bg-slate-200/70 rounded-lg w-full"></div>
+          <div className="h-20 bg-slate-200/70 rounded-md w-full"></div>
         </div>
       ) : error ? (
-        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-semibold">
+        <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-md text-xs font-semibold">
           ❌ {error}
         </div>
-      ) : rcaData ? (
-        <div className="space-y-4 transition-all duration-300">
+      ) : (
+        <div className="space-y-6 transition-all duration-300">
           {/* Verdict Banner & Fraud Risk Bar */}
-          <div className={`p-4 rounded-xl border flex flex-col md:flex-row justify-between items-start md:items-center gap-3 ${verdictInfo.cardBg}`}>
+          <div className={`p-4 rounded-md border flex flex-col md:flex-row justify-between items-start md:items-center gap-3 ${
+            rcaResult?.verdict === 'SUSPECTED_PHANTOM_LEAKAGE' || rcaResult?.verdict === 'UNEXPLAINED_LOSS'
+              ? 'bg-rose-50/90 border-rose-200 text-rose-950'
+              : rcaResult?.verdict === 'NORMAL_OPERATION' || rcaResult?.verdict === 'LEGITIMATE_SURGE'
+              ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900'
+              : 'bg-slate-50/80 border-slate-200 text-slate-900'
+          }`}>
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-md border ${verdictInfo.badgeBg}`}>
-                  {verdictInfo.icon} {verdictInfo.label}
+                <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-sm border ${
+                  rcaResult?.verdict === 'SUSPECTED_PHANTOM_LEAKAGE' || rcaResult?.verdict === 'UNEXPLAINED_LOSS'
+                    ? 'bg-rose-100 text-rose-800 border-rose-300'
+                    : rcaResult?.verdict === 'NORMAL_OPERATION' || rcaResult?.verdict === 'LEGITIMATE_SURGE'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                    : 'bg-slate-100 text-slate-800 border-slate-300'
+                }`}>
+                  <div className={`font-bold ${rcaResult?.verdict === 'SUSPECTED_PHANTOM_LEAKAGE' || rcaResult?.verdict === 'UNEXPLAINED_LOSS' ? 'text-rose-700' : 'text-emerald-700'}`}>
+                    {rcaResult?.verdict ? rcaResult.verdict.replace(/_/g, ' ') : "AWAITING AUDIT"}
+                  </div>
                 </span>
-                <span className="text-xs font-mono text-slate-600">
-                  Confidence: <strong className="text-slate-900">{confidencePct}%</strong>
-                </span>
+                {rcaResult && (
+                  <span className="text-xs font-mono text-slate-600">
+                    Confidence: <strong className="text-slate-900">{confidencePct}%</strong>
+                  </span>
+                )}
               </div>
-              <p className="text-xs text-slate-700 m-0 mt-1">
-                Target Audit Item: <strong className="text-slate-900">{rcaData.medicine}</strong> at <strong className="text-slate-900">{rcaData.facility_id}</strong>
+              <p className="text-xs text-slate-600 m-0 mt-1">
+                Target Audit Item: <strong className="text-slate-900">{rcaResult?.medicine || selectedMedicine}</strong> at <strong className="text-slate-900">{rcaResult?.facility_id || selectedFacility}</strong>
               </p>
             </div>
 
             {/* Fraud Risk Index Badge */}
-            <div className="bg-white/90 border border-slate-200 p-2.5 rounded-xl flex items-center gap-3 shadow-2xs shrink-0">
+            <div className="bg-white border border-slate-200 p-2.5 rounded-md flex items-center gap-3 shrink-0">
               <div className="text-right">
-                <span className="text-[10px] text-slate-500 font-mono block font-bold">FRAUD RISK INDEX</span>
+                <span className="text-[10px] text-slate-500 font-mono block font-bold uppercase tracking-wider">FRAUD RISK INDEX</span>
                 <span className={`text-sm font-extrabold font-mono ${fraudRiskPct > 35 ? 'text-rose-700' : 'text-emerald-700'}`}>
                   {fraudRiskPct}% {fraudRiskPct > 35 ? 'HIGH RISK' : 'LOW RISK'}
                 </span>
               </div>
-              <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center font-mono text-xs font-bold ${
+              <div className={`w-9 h-9 rounded-full border flex items-center justify-center font-mono text-xs font-bold ${
                 fraudRiskPct > 35 ? 'border-rose-300 bg-rose-50 text-rose-800' : 'border-emerald-300 bg-emerald-50 text-emerald-800'
               }`}>
                 {fraudRiskPct}%
@@ -188,86 +166,99 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
             </div>
           </div>
 
-          {/* Metric Boxes (Discrepancy Delta Grid) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-center">
-              <span className="text-slate-500 text-[11px] font-semibold block mb-0.5">TOTAL OUTFLOWS</span>
-              <strong className="text-xl font-bold text-slate-900">
-                {rcaData.discrepancy_delta?.total_units_depleted || 0}
-              </strong>
-              <span className="text-[10px] text-slate-400 block mt-0.5">Logged Register Units</span>
+          {/* Metric Cards Grid - Enterprise Flat Inline Grid with Dividers */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 border border-slate-200 rounded-md bg-white">
+            {/* CARD 1: Total Outflows */}
+            <div className="p-4 text-center">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Total Outflows</div>
+              <div className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
+                {rcaResult?.ledger_metrics?.total_dispensed || rcaResult?.audit_evidence?.total_dispensed || 0}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Logged Register Units</div>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 text-center">
-              <span className="text-blue-900 text-[11px] font-semibold block mb-0.5">CLINICALLY JUSTIFIED</span>
-              <strong className="text-xl font-bold text-blue-900">
-                {rcaData.discrepancy_delta?.clinically_justified_units || 0}
-              </strong>
-              <span className="text-[10px] text-slate-400 block mt-0.5">OPD Symptom Standard Dosing</span>
+            {/* CARD 2: Clinically Justified */}
+            <div className="p-4 text-center">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Clinically Justified</div>
+              <div className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
+                {rcaResult 
+                  ? (rcaResult.verdict === "NORMAL_OPERATION" || rcaResult.verdict === "LEGITIMATE_SURGE" 
+                      ? (rcaResult.ledger_metrics?.total_dispensed || rcaResult.audit_evidence?.total_dispensed || 0) 
+                      : 0)
+                  : 0}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">OPD Symptom Standard Dosing</div>
             </div>
 
-            <div className={`border rounded-lg p-3 text-center transition-all ${
-              unaccountedUnits > 0
-                ? 'bg-rose-50/80 border-rose-200 text-rose-800'
-                : 'bg-emerald-50/80 border-emerald-200 text-emerald-800'
-            }`}>
-              <span className="text-[11px] font-bold block mb-0.5">UNACCOUNTED DELTA</span>
-              <strong className="text-xl font-bold">
-                {unaccountedUnits}
-              </strong>
-              <span className="text-[10px] opacity-80 block mt-0.5">Variance Margin</span>
+            {/* CARD 3: Unaccounted Delta */}
+            <div className="p-4 text-center">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Unaccounted Delta</div>
+              <div className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
+                {rcaResult?.verdict === "SUSPECTED_PHANTOM_LEAKAGE" || rcaResult?.verdict === "UNEXPLAINED_LOSS"
+                  ? (rcaResult.ledger_metrics?.total_dispensed || rcaResult.audit_evidence?.total_dispensed || 0) 
+                  : 0}
+              </div>
+              <div className="text-xs text-slate-500 mt-1">Variance Margin</div>
             </div>
           </div>
 
           {/* Executive Summary Callout Box */}
-          <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-1">
-            <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider m-0 flex items-center gap-2">
+          <div className="border border-slate-200 p-4 rounded-md bg-white space-y-1">
+            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider m-0 flex items-center gap-2">
               <span>📝</span> Gemini Executive Forensic Summary
             </h4>
-            <p className="text-xs text-slate-700 m-0 leading-relaxed font-sans pt-1">
-              {rcaData.executive_summary}
-            </p>
-          </div>
-
-          {/* Two-Column Grid: Forensic Breakdown */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
-              <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-                <span>🩺</span> OPD Symptom &amp; Dosage Plausibility
-              </h5>
-              <div className="space-y-2 text-[11px] text-slate-700 pt-1">
-                <div>
-                  <strong className="text-blue-900 block font-semibold">Symptom Correlation:</strong>
-                  <span>{rcaData.forensic_breakdown?.symptom_correlation}</span>
-                </div>
-                <div>
-                  <strong className="text-blue-900 block font-semibold">Clinical Dosage Plausibility:</strong>
-                  <span>{rcaData.forensic_breakdown?.dosage_plausibility}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
-              <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2">
-                <span>🌡️</span> Environmental &amp; Seasonal Factor Plausibility
-              </h5>
-              <div className="space-y-2 text-[11px] text-slate-700 pt-1">
-                <div>
-                  <strong className="text-blue-900 block font-semibold">Environmental Vector Influence:</strong>
-                  <span>{rcaData.forensic_breakdown?.environmental_plausibility}</span>
-                </div>
-              </div>
+            <div className="text-sm text-slate-700 mt-2">
+              {rcaResult?.reasoning || rcaResult?.executive_summary || "Click 'Run Forensic Cross-Audit' to generate AI forensic summary."}
             </div>
           </div>
 
-          {/* Actionable Vigilance Protocols Checklist */}
-          {rcaData.actionable_protocols && rcaData.actionable_protocols.length > 0 && (
-            <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl space-y-2">
+          {/* Two-Column Grid: Forensic Breakdown (if available) */}
+          {rcaResult?.forensic_breakdown && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+              <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
+                <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wider text-xs">
+                  <span>🩺</span> OPD Symptom &amp; Dosage Plausibility
+                </h5>
+                <div className="space-y-2 text-xs text-slate-700 pt-1">
+                  {rcaResult.forensic_breakdown.symptom_correlation && (
+                    <div>
+                      <strong className="text-slate-900 block font-semibold">Symptom Correlation:</strong>
+                      <span>{rcaResult.forensic_breakdown.symptom_correlation}</span>
+                    </div>
+                  )}
+                  {rcaResult.forensic_breakdown.dosage_plausibility && (
+                    <div>
+                      <strong className="text-slate-900 block font-semibold">Clinical Dosage Plausibility:</strong>
+                      <span>{rcaResult.forensic_breakdown.dosage_plausibility}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
+                <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wider text-xs">
+                  <span>🌡️</span> Environmental &amp; Seasonal Factor Plausibility
+                </h5>
+                <div className="space-y-2 text-xs text-slate-700 pt-1">
+                  {rcaResult.forensic_breakdown.environmental_plausibility && (
+                    <div>
+                      <strong className="text-slate-900 block font-semibold">Environmental Vector Influence:</strong>
+                      <span>{rcaResult.forensic_breakdown.environmental_plausibility}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Actionable Vigilance Protocols Checklist (if available) */}
+          {rcaResult?.actionable_protocols && rcaResult.actionable_protocols.length > 0 && (
+            <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
               <h5 className="font-bold text-amber-900 text-xs m-0 uppercase tracking-wider flex items-center gap-2">
                 <span>🛡️</span> Actionable Vigilance Protocols
               </h5>
               <ul className="space-y-1.5 text-xs text-slate-700 m-0 pl-4 list-disc font-sans">
-                {rcaData.actionable_protocols.map((proto, idx) => (
+                {rcaResult.actionable_protocols.map((proto, idx) => (
                   <li key={idx} className="leading-snug">
                     {proto}
                   </li>
@@ -276,7 +267,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
             </div>
           )}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

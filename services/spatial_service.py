@@ -2,13 +2,15 @@ import os
 import math
 from datetime import datetime
 from typing import Dict, Any, List
-import googlemaps
-from db.memory import _appointments, _patients, get_medicine_inventory_summary
+try:
+    import googlemaps
+    gmaps_key = os.environ.get("GOOGLE_MAPS_API_KEY")
+    gmaps = googlemaps.Client(key=gmaps_key) if gmaps_key else None
+except Exception as e:
+    print(f"Google Maps Client not initialized (Local Dev Mode): {e}")
+    gmaps = None
 
-# Initialize Google Maps Client dynamically from environment variable
-# If the key is missing, the service degrades gracefully rather than crashing.
-gmaps_key = os.environ.get("GOOGLE_MAPS_API_KEY")
-gmaps = googlemaps.Client(key=gmaps_key) if gmaps_key else None
+from db.memory import _appointments, _patients, get_medicine_inventory_summary
 
 def get_coordinates(location_name: str, region_context: str = "Maharashtra, India") -> dict:
     """

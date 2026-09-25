@@ -9,6 +9,7 @@ import AuditView from './components/audit/AuditView';
 import ForecastingDashboardView from './views/ForecastingDashboardView';
 import FacilityOpsView from './views/FacilityOpsView';
 import ClinicDeskView from './views/ClinicDeskView';
+import SpatialWarRoom from './components/spatial/SpatialWarRoom';
 import { uploadDocument } from './services/api';
 
 // Create a realistic sample register SVG data URL for demo testing
@@ -209,7 +210,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
+    <div className="min-h-screen bg-white flex flex-col font-sans text-slate-900">
       {/* Top Government Header */}
       <Header activeFacility={activeFacility} setActiveFacility={setActiveFacility} />
 
@@ -269,6 +270,10 @@ export default function App() {
 
         {activeTab === 'audit' && (
           <AuditView activeFacility={activeFacility} setActiveFacility={setActiveFacility} />
+        )}
+
+        {activeTab === 'spatial-war-room' && (
+          <SpatialWarRoom activeFacility={activeFacility} />
         )}
       </main>
 

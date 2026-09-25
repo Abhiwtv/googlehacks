@@ -26,133 +26,102 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
   }, [activeFacility]);
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* Banner Card */}
-      <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 p-6 text-white relative">
-          <div className="max-w-3xl space-y-2">
-            <span className="bg-emerald-500/20 text-emerald-300 text-xs font-bold px-2.5 py-1 rounded border border-emerald-400/30 uppercase tracking-wider">
+    <div className="space-y-8 pb-12">
+      {/* Flattened Enterprise Hero Banner */}
+      <div className="pb-8 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="max-w-3xl space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm">
               National Health Supply Chain Audit Portal
             </span>
-            <h2 className="text-2xl font-extrabold tracking-tight text-white m-0">
-              Welcome, Health Records Officer
-            </h2>
-            <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
-              Digitize paper medicine registers with AI Vision (Gemini Multimodal OCR), audit stock transactions, and ensure 100% traceability for government health facilities.
-            </p>
+            <span className="text-xs text-slate-500 font-mono">Scope: <strong className="text-slate-900 font-bold">{activeFacility}</strong></span>
           </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 m-0">
+            Welcome, Health Records Officer
+          </h1>
+          <p className="text-slate-500 text-sm leading-relaxed m-0 pt-1">
+            Digitize paper medicine registers with AI Vision (Gemini Multimodal OCR), audit stock transactions, and ensure 100% traceability for government health facilities.
+          </p>
         </div>
 
-        <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex flex-wrap justify-between items-center text-xs text-slate-600 gap-2">
-          <span className="font-semibold text-slate-700">Current Facility Scope: <strong className="text-blue-800 font-bold">{activeFacility}</strong></span>
-          <div className="flex gap-2">
-            <button
-              onClick={() => loadSampleDocument(activeFacility)}
-              className="bg-blue-700 hover:bg-blue-800 text-white font-medium px-3 py-1 rounded shadow-xs text-xs flex items-center gap-1 transition-all cursor-pointer"
-            >
-              ⚡ Load Demo Register Sample
-            </button>
+        {/* Secondary Action Button */}
+        <button
+          onClick={() => loadSampleDocument(activeFacility)}
+          className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer shrink-0"
+        >
+          ⚡ Load Demo Register Sample
+        </button>
+      </div>
+
+      {/* 4 KPI Metrics - De-boxed Inline Grid */}
+      <div className="py-6 border-b border-slate-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-200">
+        {/* Metric 1 */}
+        <div className="px-4 first:pl-0 last:pr-0 space-y-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Pending Verification</p>
+          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            {pendingDocument ? '1' : '0'}
           </div>
+          <p className="text-xs text-slate-500 font-medium m-0">
+            {pendingDocument ? '⚠️ Requires Human Review' : '✓ Buffer Clear'}
+          </p>
+        </div>
+
+        {/* Metric 2 */}
+        <div className="px-4 first:pl-0 last:pr-0 space-y-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Ledger Events ({activeFacility})</p>
+          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            {loading ? '...' : facilityEventCount}
+          </div>
+          <p className="text-xs text-slate-500 font-medium m-0">
+            Immutable audit entries
+          </p>
+        </div>
+
+        {/* Metric 3 */}
+        <div className="px-4 first:pl-0 last:pr-0 space-y-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">OCR Accuracy Target</p>
+          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            99.2%
+          </div>
+          <p className="text-xs text-slate-500 font-medium m-0">
+            Gemini Vision AI Pipeline
+          </p>
+        </div>
+
+        {/* Metric 4 */}
+        <div className="px-4 first:pl-0 last:pr-0 space-y-1">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Active Facilities</p>
+          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            4
+          </div>
+          <p className="text-xs text-slate-500 font-medium m-0">
+            PHC, CHC &amp; District Hospitals
+          </p>
         </div>
       </div>
 
-      {/* Summary Statistical Callouts */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Card 1 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider m-0">Pending Verification</p>
-            <h3 className="text-3xl font-extrabold text-slate-900 m-0 mt-1">
-              {pendingDocument ? '1' : '0'}
-            </h3>
-            <p className="text-[11px] text-amber-600 font-medium m-0 mt-1">
-              {pendingDocument ? '⚠️ Requires Human Review' : 'Buffer Clear'}
-            </p>
-          </div>
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl border border-amber-200">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Card 2 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider m-0">Ledger Events ({activeFacility})</p>
-            <h3 className="text-3xl font-extrabold text-blue-900 m-0 mt-1">
-              {loading ? '...' : facilityEventCount}
-            </h3>
-            <p className="text-[11px] text-blue-600 font-medium m-0 mt-1">
-              Immutable audit entries
-            </p>
-          </div>
-          <div className="p-3 bg-blue-50 text-blue-700 rounded-xl border border-blue-200">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Card 3 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider m-0">OCR Accuracy Target</p>
-            <h3 className="text-3xl font-extrabold text-emerald-800 m-0 mt-1">
-              99.2%
-            </h3>
-            <p className="text-[11px] text-emerald-600 font-medium m-0 mt-1">
-              Gemini Vision AI Pipeline
-            </p>
-          </div>
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-200">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-          </div>
-        </div>
-
-        {/* Card 4 */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider m-0">Active Facilities</p>
-            <h3 className="text-3xl font-extrabold text-slate-900 m-0 mt-1">
-              4
-            </h3>
-            <p className="text-[11px] text-slate-500 font-medium m-0 mt-1">
-              PHC, CHC & District Hospitals
-            </p>
-          </div>
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl border border-indigo-200">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-4 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick Service Cards */}
-      <div>
-        <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-3">
+      {/* Core Public Service Operations Section */}
+      <div className="py-4 space-y-4">
+        <h2 className="text-lg font-bold text-slate-900 tracking-tight m-0">
           Core Public Service Operations
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-2">
           {/* Action 1 */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div>
-              <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold mb-3 group-hover:bg-blue-700 group-hover:text-white transition-colors">
-                1
-              </div>
-              <h4 className="font-bold text-slate-900 text-base m-0 mb-1">
-                Ingest & OCR Stock Register
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+          <div className="space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm inline-block">
+                01
+              </span>
+              <h3 className="font-bold text-slate-900 text-base tracking-tight m-0">
+                Ingest &amp; OCR Stock Register
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed m-0">
                 Upload paper stock register photos or capture directly using camera snapshot for Gemini OCR structured field extraction.
               </p>
             </div>
             <button
               onClick={() => setActiveTab('ingestion')}
-              className="w-full bg-slate-100 hover:bg-blue-700 hover:text-white text-blue-900 font-semibold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="bg-slate-900 text-white hover:bg-slate-800 rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
             >
               <span>Scan New Register</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -162,21 +131,21 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
           </div>
 
           {/* Action 2 */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div>
-              <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold mb-3 group-hover:bg-amber-600 group-hover:text-white transition-colors">
-                2
-              </div>
-              <h4 className="font-bold text-slate-900 text-base m-0 mb-1">
+          <div className="space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm inline-block">
+                02
+              </span>
+              <h3 className="font-bold text-slate-900 text-base tracking-tight m-0">
                 HITL Verification Workspace
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
-                Split-screen pan & zoom image inspection against OCR extracted JSON. Cross-check medicine counts, fix errors, and commit to ledger.
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed m-0">
+                Split-screen pan &amp; zoom image inspection against OCR extracted JSON. Cross-check medicine counts, fix errors, and commit to ledger.
               </p>
             </div>
             <button
               onClick={() => setActiveTab('hitl')}
-              className="w-full bg-slate-100 hover:bg-amber-600 hover:text-white text-amber-900 font-semibold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
             >
               <span>{pendingDocument ? 'Review Active Buffer (1)' : 'Open HITL Workspace'}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -186,21 +155,21 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
           </div>
 
           {/* Action 3 */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 hover:shadow-md transition-all flex flex-col justify-between group">
-            <div>
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold mb-3 group-hover:bg-emerald-700 group-hover:text-white transition-colors">
-                3
-              </div>
-              <h4 className="font-bold text-slate-900 text-base m-0 mb-1">
-                Audit Trail & Traceability
-              </h4>
-              <p className="text-xs text-slate-600 leading-relaxed mb-4">
+          <div className="space-y-4 flex flex-col justify-between">
+            <div className="space-y-2">
+              <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm inline-block">
+                03
+              </span>
+              <h3 className="font-bold text-slate-900 text-base tracking-tight m-0">
+                Audit Trail &amp; Traceability
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed m-0">
                 Query facility event timeline, trace specific medicine batch movements (received, dispensed, adjusted), and print compliance reports.
               </p>
             </div>
             <button
               onClick={() => setActiveTab('audit')}
-              className="w-full bg-slate-100 hover:bg-emerald-700 hover:text-white text-emerald-900 font-semibold text-xs py-2 rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer"
+              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
             >
               <span>Explore Audit Timeline</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -212,43 +181,37 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
       </div>
 
       {/* Recent Ledger Activity */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-sm font-bold text-slate-800 m-0 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+      <div className="pt-6 border-t border-slate-200 space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-lg font-bold text-slate-900 tracking-tight m-0">
             Recent Audit Events for {activeFacility}
-          </h3>
+          </h2>
           <button
             onClick={() => setActiveTab('audit')}
-            className="text-xs text-blue-700 font-semibold hover:underline cursor-pointer"
+            className="text-sm font-semibold text-slate-900 hover:text-slate-700 cursor-pointer"
           >
             View All Events &rarr;
           </button>
         </div>
 
         {recentEvents.length === 0 ? (
-          <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-200">
-            <p className="text-xs text-slate-500 m-0">No committed ledger events found for {activeFacility} yet.</p>
+          <div className="text-center py-8 bg-slate-50 rounded-md border border-dashed border-slate-200">
+            <p className="text-xs text-slate-500 m-0 font-medium">No committed ledger events found for {activeFacility} yet.</p>
             <p className="text-xs text-slate-400 mt-1">Upload a register photo or click "Load Demo Register Sample" above to test!</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-200 border-t border-slate-200">
             {recentEvents.map((evt) => (
-              <div key={evt.event_id || Math.random()} className="py-3 flex items-center justify-between text-xs">
+              <div key={evt.event_id || Math.random()} className="py-3.5 flex items-center justify-between text-sm">
                 <div className="flex items-center gap-3">
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    evt.event_type === 'DOCUMENT_VERIFIED' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
-                    evt.event_type === 'MEDICINE_RECEIVED' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
-                    evt.event_type === 'MEDICINE_DISPENSED' ? 'bg-purple-100 text-purple-800 border border-purple-200' :
-                    'bg-slate-100 text-slate-800 border border-slate-200'
-                  }`}>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-sm font-mono">
                     {evt.event_type}
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-slate-900">
                     {evt.data?.medicine ? `${evt.data.medicine} (Batch: ${evt.data.batch || 'N/A'})` : `Document Verified: ${evt.data?.document_type || 'Stock Register'}`}
                   </span>
                 </div>
-                <div className="text-slate-500 font-mono text-[11px] flex items-center gap-2">
+                <div className="text-slate-500 font-mono text-xs flex items-center gap-2">
                   <span>Actor: {evt.actor_id || 'USER_DOC_17'}</span>
                   <span>•</span>
                   <span>{evt.timestamp ? new Date(evt.timestamp).toLocaleTimeString() : 'Just now'}</span>

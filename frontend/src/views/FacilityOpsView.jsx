@@ -41,38 +41,40 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
   };
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-8 pb-8 bg-white">
       {/* View Header & Anti-Fraud Audit Badge */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-xs flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-emerald-900 text-emerald-200 text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded">
+      <div className="bg-white border-b border-slate-200 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div className="space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm font-mono">
               FEATURE 5 FRONTLINE OPS
             </span>
-            <span className="text-xs text-slate-500 font-mono">Scope: <strong className="text-blue-900">{activeFacility}</strong></span>
+            <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-sm">
+              Scope: <strong className="text-slate-900">{activeFacility}</strong>
+            </span>
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 m-0 tracking-tight mt-1">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 m-0 tracking-tight">
             Facility Readiness, Bed Monitoring &amp; Frontline Operations
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 m-0">
+          <p className="text-xs sm:text-sm text-slate-500 m-0">
             Daily clinical readiness, cold-chain vaccine storage compliance, observation ward bed tracking, and staff presence audit.
           </p>
         </div>
 
         {/* Anti-Fraud Audit Status Badge */}
-        <div className="bg-slate-900 text-white p-3 rounded-xl border border-slate-800 flex items-center gap-3 shadow-md shrink-0">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-bold text-base">
+        <div className="text-xs font-bold uppercase tracking-wider text-slate-700 bg-slate-100 border border-slate-200 px-3 py-2 rounded-sm font-mono flex items-center gap-3 shrink-0">
+          <div className="w-8 h-8 rounded-sm bg-slate-200 text-slate-800 flex items-center justify-center font-bold text-base">
             🛡️
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-mono font-bold text-emerald-300">
+              <span className="w-2 h-2 rounded-full bg-slate-900"></span>
+              <span className="text-xs font-mono font-bold text-slate-900">
                 Anti-Fraud Audit Status: ACTIVE
               </span>
             </div>
-            <p className="text-[11px] text-slate-400 m-0">
+            <p className="text-[11px] text-slate-500 m-0 font-sans normal-case">
               Dispensing cross-verified against active staff presence
             </p>
           </div>
@@ -80,7 +82,7 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
       </div>
 
       {isReadinessSubmitted && (
-        <div className="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-4 text-emerald-950 shadow-xs flex items-center justify-between animate-fade-in">
+        <div className="bg-emerald-50 border border-emerald-200 rounded-md p-4 text-emerald-950 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-bold">
             <span className="text-base">✓</span>
             <span>Morning Readiness Log Submitted &amp; Verified for {activeFacility}! Cold-chain compliance recorded.</span>
@@ -92,30 +94,30 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
       {/* Main Grid: Checklist + Bed Occupancy */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Daily Operational Checklist */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-5 bg-white rounded-md border border-slate-200 p-6 flex flex-col justify-between space-y-6">
           <div className="space-y-5">
-            <div className="pb-3 border-b border-slate-100 flex justify-between items-center">
+            <div className="pb-3 border-b border-slate-200 flex justify-between items-center">
               <h3 className="text-base font-bold text-slate-900 m-0 flex items-center gap-2">
                 <span>📋 Morning Operational Readiness Log</span>
               </h3>
-              <span className="bg-blue-50 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-200">
+              <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-sm border border-slate-200 uppercase font-mono">
                 Daily Mandate
               </span>
             </div>
 
             {/* Cold-Chain Refrigerator Temperature Gauge */}
-            <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 space-y-3">
+            <div className="bg-slate-50 rounded-md border border-slate-200 p-4 space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-slate-700">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
                   🧊 Vaccine Cold-Chain Refrigerator Temp:
                 </span>
-                <span className="bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold px-2 py-0.5 rounded">
+                <span className="bg-emerald-50 text-emerald-900 border border-emerald-200 text-[10px] font-bold px-2 py-0.5 rounded-sm uppercase font-mono">
                   Safe / Compliant (2°C – 8°C)
                 </span>
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="text-3xl font-extrabold text-blue-900 font-mono">
+                <div className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight">
                   {fridgeTemp.toFixed(1)}°C
                 </div>
                 <div className="flex-1">
@@ -126,7 +128,7 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
                     step="0.1"
                     value={fridgeTemp}
                     onChange={(e) => setFridgeTemp(parseFloat(e.target.value))}
-                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-700"
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-slate-900"
                   />
                   <div className="flex justify-between text-[10px] text-slate-500 font-mono mt-1">
                     <span>2.0°C (Min)</span>
@@ -139,19 +141,19 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
 
             {/* Sanitization & Bio-Waste Checkbox Items */}
             <div className="space-y-3">
-              <span className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+              <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
                 Sanitization &amp; Hygiene Clearance:
               </span>
 
-              <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100/80 cursor-pointer transition-colors">
+              <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-md border border-slate-200 hover:bg-slate-100/80 cursor-pointer transition">
                 <input
                   type="checkbox"
                   checked={isSterilized}
                   onChange={(e) => setIsSterilized(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 text-blue-700 rounded border-slate-300 focus:ring-blue-600 cursor-pointer"
+                  className="mt-0.5 h-4 w-4 text-slate-900 rounded border-slate-300 focus:ring-slate-900 cursor-pointer"
                 />
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">
+                  <span className="text-xs font-bold text-slate-900 block">
                     Morning Sterilization Complete
                   </span>
                   <span className="text-[11px] text-slate-500">
@@ -160,15 +162,15 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
                 </div>
               </label>
 
-              <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl border border-slate-200 hover:bg-slate-100/80 cursor-pointer transition-colors">
+              <label className="flex items-start gap-3 p-3 bg-slate-50 rounded-md border border-slate-200 hover:bg-slate-100/80 cursor-pointer transition">
                 <input
                   type="checkbox"
                   checked={isBiowasteCleared}
                   onChange={(e) => setIsBiowasteCleared(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 text-blue-700 rounded border-slate-300 focus:ring-blue-600 cursor-pointer"
+                  className="mt-0.5 h-4 w-4 text-slate-900 rounded border-slate-300 focus:ring-slate-900 cursor-pointer"
                 />
                 <div>
-                  <span className="text-xs font-bold text-slate-800 block">
+                  <span className="text-xs font-bold text-slate-900 block">
                     Color-Coded Bio-Medical Waste Cleared
                   </span>
                   <span className="text-[11px] text-slate-500">
@@ -182,7 +184,7 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
           {/* Submit Action Button */}
           <button
             onClick={handleSubmitReadiness}
-            className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs py-3.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-98"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-3 rounded-md transition cursor-pointer"
           >
             <span>✓ Submit Morning Readiness Log</span>
           </button>
@@ -191,8 +193,8 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
         {/* Right Column: Observation Bed Occupancy Tracker & Staff Panel */}
         <div className="lg:col-span-7 space-y-6">
           {/* Bed Occupancy Grid */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
+          <div className="bg-white rounded-md border border-slate-200 p-6 space-y-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-200">
               <div>
                 <h3 className="text-base font-bold text-slate-900 m-0 flex items-center gap-2">
                   <span>🛌 Observation Ward Bed Occupancy</span>
@@ -203,9 +205,9 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
               </div>
 
               {/* Occupancy Summary Pill */}
-              <div className="bg-slate-100 border border-slate-200 px-3 py-1 rounded-xl text-xs font-bold text-slate-800 flex items-center gap-2">
+              <div className="bg-slate-100 border border-slate-200 px-3 py-1 rounded-sm text-xs font-bold text-slate-800 flex items-center gap-2 font-mono">
                 <span>Occupancy:</span>
-                <span className="text-blue-900 font-mono">{occupiedCount} / {beds.length} Beds ({occupancyPercent}%)</span>
+                <span className="text-slate-900 font-extrabold">{occupiedCount} / {beds.length} Beds ({occupancyPercent}%)</span>
               </div>
             </div>
 
@@ -214,25 +216,25 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
               {beds.map((bed) => (
                 <div
                   key={bed.id}
-                  className={`rounded-xl border p-4 shadow-2xs flex flex-col justify-between space-y-3 transition-all ${
+                  className={`rounded-md border p-4 flex flex-col justify-between space-y-3 transition ${
                     bed.status === 'Available'
-                      ? 'border-emerald-300 bg-emerald-50/30 hover:border-emerald-400'
+                      ? 'border-emerald-200 bg-emerald-50/20'
                       : bed.status === 'Critical'
-                      ? 'border-rose-300 bg-rose-50/30 hover:border-rose-400'
-                      : 'border-amber-300 bg-amber-50/30 hover:border-amber-400'
+                      ? 'border-rose-200 bg-rose-50/20'
+                      : 'border-slate-200 bg-slate-50/50'
                   }`}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="font-mono font-extrabold text-xs text-slate-800">
+                    <span className="font-mono font-bold text-xs text-slate-900">
                       {bed.id}
                     </span>
                     <span
-                      className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
+                      className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm font-mono border ${
                         bed.status === 'Available'
-                          ? 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                          ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
                           : bed.status === 'Critical'
-                          ? 'bg-rose-100 text-rose-900 border border-rose-300'
-                          : 'bg-amber-100 text-amber-900 border border-amber-300'
+                          ? 'bg-rose-50 text-rose-900 border-rose-200'
+                          : 'bg-amber-50 text-amber-900 border-amber-200'
                       }`}
                     >
                       {bed.status}
@@ -251,10 +253,10 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
                   {/* Toggle Action */}
                   <button
                     onClick={() => toggleBedStatus(bed.id)}
-                    className={`w-full text-xs font-bold py-1.5 rounded-lg border transition-all cursor-pointer ${
+                    className={`w-full text-xs font-medium py-1.5 rounded-md border transition cursor-pointer ${
                       bed.status === 'Available'
-                        ? 'bg-emerald-700 hover:bg-emerald-800 text-white border-emerald-800'
-                        : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300'
+                        ? 'bg-slate-900 hover:bg-slate-800 text-white border-slate-900'
+                        : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-300'
                     }`}
                   >
                     {bed.status === 'Available' ? '+ Admit Patient' : 'Discharge Bed'}
@@ -265,34 +267,34 @@ export default function FacilityOpsView({ activeFacility = 'PHC-042' }) {
           </div>
 
           {/* Active On-Duty Personnel Panel */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs space-y-3">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider m-0 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <div className="bg-white rounded-md border border-slate-200 p-6 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider m-0 flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
               Verified Active On-Duty Personnel ({activeFacility})
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200 space-y-0.5">
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Medical Officer In-Charge</span>
                 <span className="text-xs font-bold text-slate-900 block">Dr. Rajesh Kumar</span>
-                <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Active
+                <span className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Verified Active
                 </span>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200 space-y-0.5">
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Station Pharmacist</span>
                 <span className="text-xs font-bold text-slate-900 block">Dr. R. Sharma</span>
-                <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Active
+                <span className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Verified Active
                 </span>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              <div className="p-3 bg-slate-50 rounded-md border border-slate-200 space-y-0.5">
                 <span className="text-[10px] uppercase font-bold text-slate-500 block">Staff Nurse (Triage)</span>
                 <span className="text-xs font-bold text-slate-900 block">Sister Anitha</span>
-                <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Active
+                <span className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> Verified Active
                 </span>
               </div>
             </div>

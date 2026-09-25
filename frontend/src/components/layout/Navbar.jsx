@@ -13,7 +13,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
     },
     {
       id: 'ingestion',
-      label: 'Register Ingestion & Capture',
+      label: 'Register Ingestion',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -32,7 +32,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
     },
     {
       id: 'forecast',
-      label: 'Demand & Footfall Forecast',
+      label: 'Demand Forecast',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -41,7 +41,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
     },
     {
       id: 'facility-ops',
-      label: 'Facility Ops & Beds',
+      label: 'Facility Ops',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -50,7 +50,7 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
     },
     {
       id: 'clinic-desk',
-      label: 'OPD & E-Prescriptions',
+      label: 'OPD Desk',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -58,8 +58,17 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
       ),
     },
     {
+      id: 'spatial-war-room',
+      label: 'Spatial War Room',
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 002 2h1.5a2.5 2.5 0 002.5-2.5V7.5A2.5 2.5 0 0016.5 5H15M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    {
       id: 'audit',
-      label: 'Audit Trail & Timeline',
+      label: 'Audit Trail',
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -69,24 +78,24 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
   ];
 
   return (
-    <nav className="bg-slate-800 border-b border-slate-700 px-4 sm:px-6">
-      <div className="flex space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar">
+    <nav className="bg-white border-b border-slate-200 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto flex space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-xs sm:text-sm font-semibold transition-all border-b-2 whitespace-nowrap cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-3 text-xs transition-colors border-b-2 whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'border-amber-400 text-amber-300 bg-slate-900/60'
-                  : 'border-transparent text-slate-300 hover:text-white hover:bg-slate-700/50'
+                  ? 'border-slate-900 text-slate-900 font-bold'
+                  : 'border-transparent text-slate-500 hover:text-slate-900 font-medium'
               }`}
             >
               {tab.icon}
               <span>{tab.label}</span>
               {tab.badge && (
-                <span className="bg-amber-500 text-slate-950 font-extrabold text-[10px] px-1.5 py-0.5 rounded-full shadow-xs">
+                <span className="bg-slate-900 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-sm">
                   {tab.badge}
                 </span>
               )}
