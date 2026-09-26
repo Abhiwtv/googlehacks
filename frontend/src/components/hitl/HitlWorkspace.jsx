@@ -42,9 +42,9 @@ export default function HitlWorkspace({
         <div className="flex flex-wrap justify-center gap-3">
           <button
             onClick={() => onLoadSample(activeFacility)}
-            className="bg-blue-700 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs shadow-sm flex items-center gap-2 cursor-pointer transition-all"
+            className="bg-[#063b70] hover:bg-[#052d56] text-white px-4 py-2 rounded-md font-medium text-sm transition-all shadow-none flex items-center gap-2 cursor-pointer"
           >
-            ⚡ Load Demo Register Sample ({activeFacility})
+            <span>Load Demo Register Sample ({activeFacility})</span>
           </button>
         </div>
       </div>
@@ -137,7 +137,8 @@ export default function HitlWorkspace({
       {discrepancies.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-md p-4 text-amber-900 text-xs space-y-1">
           <div className="flex items-center gap-2 font-bold text-amber-900 text-sm">
-            <span>⚠️ Discrepancy Warning Detected</span>
+            <span className="bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-extrabold px-1.5 py-0.5 rounded-sm uppercase tracking-wider">Warning</span>
+            <span>Discrepancy Warning Detected</span>
           </div>
           <p className="m-0 leading-relaxed text-slate-700">
             The following medicine records specify <strong>Quantity Dispensed</strong> greater than <strong>Quantity Received</strong> in this transaction. Please cross-check against the register photo on the left:
@@ -156,8 +157,8 @@ export default function HitlWorkspace({
       {commitResult && (
         <div className="bg-emerald-50 border border-emerald-200 rounded-md p-6 text-emerald-950 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-700 text-white flex items-center justify-center font-bold text-base shrink-0">
-              ✓
+            <div className="w-8 h-8 rounded-md bg-[#063b70] text-white flex items-center justify-center font-bold text-xs shrink-0">
+              OK
             </div>
             <div>
               <h3 className="text-base font-bold text-emerald-900 m-0 tracking-tight">
@@ -176,9 +177,9 @@ export default function HitlWorkspace({
             {/* 1-Click CTA button requested by user! */}
             <button
               onClick={() => onViewAuditTrail(formData.facility_id)}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2.5 rounded-md transition flex items-center gap-2 cursor-pointer"
+              className="bg-[#063b70] hover:bg-[#052d56] text-white font-medium text-xs px-4 py-2 rounded-md transition flex items-center gap-2 cursor-pointer"
             >
-              <span>🔍 View Ledger Audit Trail for {formData.facility_id} &rarr;</span>
+              <span>View Ledger Audit Trail for {formData.facility_id} &rarr;</span>
             </button>
           </div>
         </div>
@@ -186,7 +187,7 @@ export default function HitlWorkspace({
 
       {errorMsg && (
         <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-md text-xs font-semibold">
-          ❌ {errorMsg}
+          {errorMsg}
         </div>
       )}
 
@@ -256,7 +257,7 @@ export default function HitlWorkspace({
                 </h4>
                 <button
                   onClick={handleAddField}
-                  className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold text-xs px-3 py-1 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                  className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs px-3 py-1 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <span>+ Add Row</span>
                 </button>
@@ -342,8 +343,8 @@ export default function HitlWorkspace({
                               }`}
                             />
                             {hasDiscrepancy && (
-                              <span title="Quantity Dispensed exceeds Received" className="absolute -top-2 -right-1 text-xs">
-                                ⚠️
+                              <span title="Quantity Dispensed exceeds Received" className="absolute -top-2 -right-1 text-[9px] font-extrabold text-amber-700 bg-amber-100 border border-amber-300 px-1 rounded-sm uppercase">
+                                Alert
                               </span>
                             )}
                           </div>
@@ -375,12 +376,12 @@ export default function HitlWorkspace({
             <button
               onClick={handleSubmitVerification}
               disabled={isSubmitting || !!commitResult}
-              className={`w-full sm:w-auto px-6 py-2.5 rounded-md font-semibold text-xs transition cursor-pointer flex items-center justify-center gap-2 ${
+              className={`w-full sm:w-auto px-4 py-2 rounded-md font-medium text-sm transition shadow-none cursor-pointer flex items-center justify-center gap-2 ${
                 commitResult
                   ? 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'
                   : isSubmitting
-                  ? 'bg-slate-800 text-white cursor-wait'
-                  : 'bg-slate-900 hover:bg-slate-800 text-white'
+                  ? 'bg-[#052d56] text-white cursor-wait'
+                  : 'bg-[#063b70] hover:bg-[#052d56] text-white'
               }`}
             >
               {isSubmitting ? (
@@ -393,7 +394,7 @@ export default function HitlWorkspace({
                 </>
               ) : (
                 <>
-                  <span>✓ Verify &amp; Commit to Ledger</span>
+                  <span>Verify &amp; Commit to Ledger</span>
                 </>
               )}
             </button>

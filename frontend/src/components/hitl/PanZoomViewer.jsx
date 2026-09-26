@@ -36,11 +36,11 @@ export default function PanZoomViewer({ imageUrl, documentId }) {
   const handleMouseUp = () => setIsDragging(false);
 
   return (
-    <div className={`bg-slate-950 rounded-xl border border-slate-800 flex flex-col overflow-hidden shadow-inner ${isFullscreen ? 'fixed inset-4 z-50 rounded-2xl shadow-2xl' : 'h-[620px]'}`}>
+    <div className={`bg-slate-900 rounded-md border border-slate-800 flex flex-col overflow-hidden ${isFullscreen ? 'fixed inset-4 z-50 shadow-2xl' : 'h-[620px]'}`}>
       {/* Control Bar */}
-      <div className="bg-slate-900 px-4 py-2.5 border-b border-slate-800 flex flex-wrap justify-between items-center text-xs text-slate-300 gap-2 select-none">
+      <div className="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex flex-wrap justify-between items-center text-xs text-slate-300 gap-2 select-none">
         <div className="flex items-center gap-2 font-mono">
-          <span className="bg-blue-900 text-blue-200 px-2 py-0.5 rounded text-[11px] font-bold">
+          <span className="bg-[#063b70] text-white px-2 py-0.5 rounded-sm text-[11px] font-bold">
             ORIGINAL REGISTER IMAGE
           </span>
           {documentId && (
@@ -51,36 +51,36 @@ export default function PanZoomViewer({ imageUrl, documentId }) {
         </div>
 
         {/* Action Controls */}
-        <div className="flex items-center gap-1.5 bg-slate-850 p-1 rounded-lg border border-slate-800">
+        <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded border border-slate-800 font-mono">
           <button
             onClick={handleZoomOut}
             title="Zoom Out"
-            className="p-1.5 hover:bg-slate-700 text-slate-200 hover:text-white rounded transition-colors cursor-pointer"
+            className="px-2 py-1 hover:bg-slate-800 text-slate-200 hover:text-white rounded transition-colors cursor-pointer font-bold"
           >
-            🔍-
+            &minus;
           </button>
-          <span className="font-mono text-[11px] text-amber-300 px-1 font-bold min-w-[45px] text-center">
+          <span className="text-[11px] text-white px-1 font-bold min-w-[45px] text-center">
             {Math.round(zoom * 100)}%
           </span>
           <button
             onClick={handleZoomIn}
             title="Zoom In"
-            className="p-1.5 hover:bg-slate-700 text-slate-200 hover:text-white rounded transition-colors cursor-pointer"
+            className="px-2 py-1 hover:bg-slate-800 text-slate-200 hover:text-white rounded transition-colors cursor-pointer font-bold"
           >
-            🔍+
+            &#43;
           </button>
           <span className="text-slate-700">|</span>
           <button
             onClick={handleRotate}
             title="Rotate 90°"
-            className="p-1.5 hover:bg-slate-700 text-slate-200 hover:text-white rounded transition-colors cursor-pointer"
+            className="px-2 py-1 hover:bg-slate-800 text-slate-200 hover:text-white rounded transition-colors cursor-pointer text-xs"
           >
-            🔄 {rotation}°
+            Rotate {rotation}&deg;
           </button>
           <button
             onClick={handleReset}
             title="Reset View"
-            className="px-2 py-1 hover:bg-slate-700 text-xs font-semibold text-slate-300 hover:text-white rounded transition-colors cursor-pointer"
+            className="px-2 py-1 hover:bg-slate-800 text-xs font-semibold text-slate-300 hover:text-white rounded transition-colors cursor-pointer"
           >
             Reset
           </button>
@@ -88,9 +88,9 @@ export default function PanZoomViewer({ imageUrl, documentId }) {
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
             title="Toggle Fullscreen"
-            className="p-1.5 hover:bg-slate-700 text-slate-200 hover:text-white rounded transition-colors cursor-pointer"
+            className="px-2 py-1 hover:bg-slate-800 text-slate-200 hover:text-white rounded transition-colors cursor-pointer text-xs"
           >
-            {isFullscreen ? '↙ ↗' : '⤢'}
+            {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
           </button>
         </div>
       </div>
@@ -112,7 +112,7 @@ export default function PanZoomViewer({ imageUrl, documentId }) {
               transform: `translate(${position.x}px, ${position.y}px) scale(${zoom}) rotate(${rotation}deg)`,
               transition: isDragging ? 'none' : 'transform 0.15s ease-out',
             }}
-            className="max-h-full max-w-full object-contain pointer-events-none select-none drop-shadow-xl"
+            className="max-h-full max-w-full object-contain pointer-events-none select-none"
           />
         ) : (
           <div className="text-center text-slate-500 space-y-2">
@@ -126,8 +126,8 @@ export default function PanZoomViewer({ imageUrl, documentId }) {
 
         {/* Pan Helper Hint */}
         {zoom > 1 && (
-          <div className="absolute bottom-3 left-3 bg-black/70 text-slate-300 text-[10px] px-2.5 py-1 rounded backdrop-blur-xs font-mono pointer-events-none">
-            🖐 Drag image to pan & examine handwriting
+          <div className="absolute bottom-3 left-3 bg-slate-900/90 border border-slate-700 text-slate-300 text-[10px] px-2.5 py-1 rounded-sm font-mono pointer-events-none">
+            Drag image to pan &amp; examine handwriting
           </div>
         )}
       </div>

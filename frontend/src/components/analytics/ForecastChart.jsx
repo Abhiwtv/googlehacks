@@ -69,7 +69,7 @@ export default function ForecastChart({ forecastData }) {
       return (
         <div className="bg-slate-900 border border-slate-700 text-white p-3 rounded-xl shadow-xl text-xs space-y-1 font-mono">
           <p className="font-bold text-amber-300 m-0 border-b border-slate-800 pb-1">
-            📅 Date: {label}
+            Date: {label}
           </p>
           <p className="text-blue-400 font-bold m-0 flex justify-between gap-4">
             <span>Predicted Footfall:</span>
@@ -91,7 +91,7 @@ export default function ForecastChart({ forecastData }) {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-600"></span>
           </span>
-          <span>⚡ Powered by {mlModel}</span>
+          <span>Powered by {mlModel}</span>
         </div>
 
         {/* Actionable Warning Button if total_7_day_expected_footfall > 500 */}
@@ -99,14 +99,14 @@ export default function ForecastChart({ forecastData }) {
           <div>
             {supplyRequested ? (
               <span className="bg-emerald-50 text-emerald-900 border border-emerald-200 font-semibold text-xs px-4 py-2 rounded-md flex items-center gap-1.5">
-                ✓ Preventive Supply Drop Dispatched (Req #SD-{Math.floor(1000 + Math.random() * 9000)})
+                Preventive Supply Drop Dispatched (Req #SD-{Math.floor(1000 + Math.random() * 9000)})
               </span>
             ) : (
               <button
                 onClick={handleRequestSupplyDrop}
                 className="bg-amber-50 border border-amber-200 text-amber-900 font-semibold text-xs px-4 py-2 rounded-md hover:bg-amber-100 transition cursor-pointer flex items-center gap-2"
               >
-                <span>⚠️ Warning: High footfall predicted ({totalFootfall} patients). Click to request preventive supply drop.</span>
+                <span>Warning: High footfall predicted ({totalFootfall} patients). Click to request preventive supply drop.</span>
               </button>
             )}
           </div>
@@ -118,7 +118,7 @@ export default function ForecastChart({ forecastData }) {
         <div className="flex justify-between items-center pb-3 border-b border-slate-200">
           <div>
             <h3 className="text-base font-bold text-slate-900 m-0 tracking-tight flex items-center gap-2">
-              <span>📈</span> 7-Day OPD Patient Footfall Forecast (Dashed ARIMA_PLUS Curve)
+              7-Day OPD Patient Footfall Forecast (Dashed ARIMA_PLUS Curve)
             </h3>
             <p className="text-xs text-slate-500 m-0">
               BigQuery ML projected daily check-in volume for {forecastData?.facility_id || 'PHC-042'}.
@@ -173,7 +173,7 @@ export default function ForecastChart({ forecastData }) {
       {/* 7-Day Medicine Demand Summary Cards */}
       <div className="space-y-3 pt-2">
         <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider m-0 flex items-center gap-1.5">
-          <span>💊</span> 7-Day Predicted Medicine Demand Forecast
+          7-Day Predicted Medicine Demand Forecast
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {medicineItems.map((item, idx) => (

@@ -56,14 +56,14 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
         <div className="space-y-1.5">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm font-mono">
-              ⚡ Gemini 2.5 Flash Grounded
+              Gemini 2.5 Flash Grounded
             </span>
             <span className="text-xs font-mono font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-sm">
               Scope: {selectedFacility}
             </span>
           </div>
           <h3 className="text-base font-bold text-slate-900 tracking-tight flex items-center gap-2 m-0">
-            <span>✨</span> AI Grounded Root Cause Analysis &amp; Forensic Cross-Audit
+            AI Grounded Root Cause Analysis &amp; Forensic Cross-Audit
           </h3>
         </div>
 
@@ -84,7 +84,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
           <button
             onClick={() => handleRunRca(selectedMedicine)}
             disabled={loading}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="bg-[#063b70] hover:bg-[#052d56] text-white px-4 py-2 rounded-md font-medium text-sm transition-all shadow-none cursor-pointer flex items-center gap-1.5 shrink-0"
           >
             {loading ? (
               <>
@@ -95,7 +95,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
                 <span>Auditing...</span>
               </>
             ) : (
-              <span>🔍 Run Forensic Cross-Audit</span>
+              <span>Run Forensic Cross-Audit</span>
             )}
           </button>
         </div>
@@ -114,7 +114,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
         </div>
       ) : error ? (
         <div className="p-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-md text-xs font-semibold">
-          ❌ {error}
+          {error}
         </div>
       ) : (
         <div className="space-y-6 transition-all duration-300">
@@ -205,7 +205,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
           {/* Executive Summary Callout Box */}
           <div className="border border-slate-200 p-4 rounded-md bg-white space-y-1">
             <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider m-0 flex items-center gap-2">
-              <span>📝</span> Gemini Executive Forensic Summary
+              Gemini Executive Forensic Summary
             </h4>
             <div className="text-sm text-slate-700 mt-2">
               {rcaResult?.reasoning || rcaResult?.executive_summary || "Click 'Run Forensic Cross-Audit' to generate AI forensic summary."}
@@ -217,7 +217,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
                 <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wider text-xs">
-                  <span>🩺</span> OPD Symptom &amp; Dosage Plausibility
+                  OPD Symptom &amp; Dosage Plausibility
                 </h5>
                 <div className="space-y-2 text-xs text-slate-700 pt-1">
                   {rcaResult.forensic_breakdown.symptom_correlation && (
@@ -237,7 +237,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
 
               <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
                 <h5 className="font-bold text-slate-900 m-0 flex items-center gap-1.5 border-b border-slate-200 pb-2 uppercase tracking-wider text-xs">
-                  <span>🌡️</span> Environmental &amp; Seasonal Factor Plausibility
+                  Environmental &amp; Seasonal Factor Plausibility
                 </h5>
                 <div className="space-y-2 text-xs text-slate-700 pt-1">
                   {rcaResult.forensic_breakdown.environmental_plausibility && (
@@ -255,7 +255,7 @@ export default function GeminiRCACard({ selectedFacility = 'PHC-042', events = [
           {rcaResult?.actionable_protocols && rcaResult.actionable_protocols.length > 0 && (
             <div className="border border-slate-200 p-4 rounded-md bg-white space-y-2">
               <h5 className="font-bold text-amber-900 text-xs m-0 uppercase tracking-wider flex items-center gap-2">
-                <span>🛡️</span> Actionable Vigilance Protocols
+                Actionable Vigilance Protocols
               </h5>
               <ul className="space-y-1.5 text-xs text-slate-700 m-0 pl-4 list-disc font-sans">
                 {rcaResult.actionable_protocols.map((proto, idx) => (

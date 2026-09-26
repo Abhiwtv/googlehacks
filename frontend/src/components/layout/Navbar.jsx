@@ -88,14 +88,14 @@ export default function Navbar({ activeTab, setActiveTab, pendingCount }) {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-1.5 px-3.5 py-3 text-xs transition-colors border-b-2 whitespace-nowrap cursor-pointer ${
                 isActive
-                  ? 'border-slate-900 text-slate-900 font-bold'
+                  ? 'border-[#063b70] text-[#063b70] font-bold'
                   : 'border-transparent text-slate-500 hover:text-slate-900 font-medium'
               }`}
             >
               {tab.icon}
               <span>{tab.label}</span>
               {tab.badge && (
-                <span className="bg-slate-900 text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-sm">
+                <span className="bg-[#063b70] text-white font-extrabold text-[10px] px-1.5 py-0.5 rounded-sm">
                   {tab.badge}
                 </span>
               )}

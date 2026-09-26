@@ -31,7 +31,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
       <div className="pb-8 border-b border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="max-w-3xl space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-600 bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-sm">
               National Health Supply Chain Audit Portal
             </span>
             <span className="text-xs text-slate-500 font-mono">Scope: <strong className="text-slate-900 font-bold">{activeFacility}</strong></span>
@@ -47,9 +47,9 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
         {/* Secondary Action Button */}
         <button
           onClick={() => loadSampleDocument(activeFacility)}
-          className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer shrink-0"
+          className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-all cursor-pointer shrink-0"
         >
-          ⚡ Load Demo Register Sample
+          Load Demo Register Sample
         </button>
       </div>
 
@@ -57,19 +57,19 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
       <div className="py-6 border-b border-slate-200 grid grid-cols-2 md:grid-cols-4 divide-x divide-slate-200">
         {/* Metric 1 */}
         <div className="px-4 first:pl-0 last:pr-0 space-y-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Pending Verification</p>
-          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Pending Verification</p>
+          <div className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             {pendingDocument ? '1' : '0'}
           </div>
           <p className="text-xs text-slate-500 font-medium m-0">
-            {pendingDocument ? '⚠️ Requires Human Review' : '✓ Buffer Clear'}
+            {pendingDocument ? 'Requires Human Review' : 'Buffer Clear'}
           </p>
         </div>
 
         {/* Metric 2 */}
         <div className="px-4 first:pl-0 last:pr-0 space-y-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Ledger Events ({activeFacility})</p>
-          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Ledger Events ({activeFacility})</p>
+          <div className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             {loading ? '...' : facilityEventCount}
           </div>
           <p className="text-xs text-slate-500 font-medium m-0">
@@ -79,8 +79,8 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
 
         {/* Metric 3 */}
         <div className="px-4 first:pl-0 last:pr-0 space-y-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">OCR Accuracy Target</p>
-          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">OCR Accuracy Target</p>
+          <div className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             99.2%
           </div>
           <p className="text-xs text-slate-500 font-medium m-0">
@@ -90,8 +90,8 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
 
         {/* Metric 4 */}
         <div className="px-4 first:pl-0 last:pr-0 space-y-1">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider m-0">Active Facilities</p>
-          <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Active Facilities</p>
+          <div className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">
             4
           </div>
           <p className="text-xs text-slate-500 font-medium m-0">
@@ -121,7 +121,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
             </div>
             <button
               onClick={() => setActiveTab('ingestion')}
-              className="bg-slate-900 text-white hover:bg-slate-800 rounded-md px-4 py-2 text-sm font-semibold transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
+              className="bg-[#063b70] hover:bg-[#052d56] text-white rounded-md px-4 py-2 text-sm font-semibold transition-all cursor-pointer w-full text-center flex items-center justify-center gap-1.5 shadow-none"
             >
               <span>Scan New Register</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -145,7 +145,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
             </div>
             <button
               onClick={() => setActiveTab('hitl')}
-              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
+              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-all cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
             >
               <span>{pendingDocument ? 'Review Active Buffer (1)' : 'Open HITL Workspace'}</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -169,7 +169,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
             </div>
             <button
               onClick={() => setActiveTab('audit')}
-              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-colors cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
+              className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 rounded-md px-4 py-2 text-sm font-medium transition-all cursor-pointer w-full text-center flex items-center justify-center gap-1.5"
             >
               <span>Explore Audit Timeline</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
           </h2>
           <button
             onClick={() => setActiveTab('audit')}
-            className="text-sm font-semibold text-slate-900 hover:text-slate-700 cursor-pointer"
+            className="text-sm font-semibold text-[#063b70] hover:text-[#052d56] cursor-pointer"
           >
             View All Events &rarr;
           </button>
@@ -197,7 +197,7 @@ export default function Dashboard({ activeFacility, setActiveTab, pendingDocumen
         {recentEvents.length === 0 ? (
           <div className="text-center py-8 bg-slate-50 rounded-md border border-dashed border-slate-200">
             <p className="text-xs text-slate-500 m-0 font-medium">No committed ledger events found for {activeFacility} yet.</p>
-            <p className="text-xs text-slate-400 mt-1">Upload a register photo or click "Load Demo Register Sample" above to test!</p>
+            <p className="text-xs text-slate-400 mt-1">Upload a register photo or click "Load Demo Register Sample" above to test.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-200 border-t border-slate-200">

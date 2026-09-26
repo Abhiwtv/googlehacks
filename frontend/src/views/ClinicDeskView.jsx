@@ -129,13 +129,9 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
       setSelectedPatientId(generatedPatientId);
       setIsRegistering(false);
 
-      // Reset form
-      setName('');
-      setAge('');
-      setSelectedSymptoms(['Fever']);
       setToastMessage({
         type: 'info',
-        text: `✓ Patient ${patientPayload.name} checked in at Reception! Added to Doctor Queue.`,
+        text: `Patient ${patientPayload.name} checked in at Reception! Added to Doctor Queue.`,
       });
     }
   };
@@ -202,7 +198,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
       setIsSubmittingRx(false);
       setToastMessage({
         type: 'success',
-        text: `🎉 Prescription Signed & Dispensed! ${totalDeductedStr} automatically deducted from ${activeFacility} Ledger!`,
+        text: `Prescription Signed & Dispensed! ${totalDeductedStr} automatically deducted from ${activeFacility} Ledger!`,
       });
     }
   };
@@ -224,7 +220,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 m-0 tracking-tight flex items-center gap-2">
-            🩺 OPD Patient Reception &amp; E-Prescription Desk
+            OPD Patient Reception &amp; E-Prescription Desk
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 m-0">
             Frontline OPD registration, symptom check-in, doctor consultation, and real-time inventory auto-dispense linkage.
@@ -253,16 +249,16 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
             {onViewAuditTrail && (
               <button
                 onClick={() => onViewAuditTrail(activeFacility)}
-                className="bg-slate-900 text-white hover:bg-slate-800 px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer transition"
+                className="bg-[#063b70] text-white hover:bg-[#052d56] px-3 py-1 rounded-md text-[11px] font-semibold cursor-pointer transition shadow-none"
               >
-                View Audit Ledger →
+                View Audit Ledger &rarr;
               </button>
             )}
             <button
               onClick={() => setToastMessage(null)}
-              className="text-slate-500 hover:text-slate-900 text-base leading-none cursor-pointer"
+              className="text-slate-500 hover:text-slate-900 text-xs font-bold leading-none cursor-pointer"
             >
-              ✕
+              Dismiss
             </button>
           </div>
         </div>
@@ -276,7 +272,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
           <div className="bg-white rounded-md border border-slate-200 p-5 space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200">
               <h3 className="text-base font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
-                <span>📋</span> OPD Patient Reception Check-In
+                OPD Patient Reception Check-In
               </h3>
               <span className="text-xs font-semibold text-slate-500 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-sm font-mono">OPD Desk</span>
             </div>
@@ -351,7 +347,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                         onClick={() => toggleSymptom(sym)}
                         className={`text-[11px] font-semibold px-2.5 py-1 rounded-sm border transition cursor-pointer ${
                           isSelected
-                            ? 'bg-slate-900 text-white border-slate-900'
+                            ? 'bg-[#063b70] text-white border-[#063b70]'
                             : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                         }`}
                       >
@@ -365,9 +361,9 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
               <button
                 type="submit"
                 disabled={isRegistering}
-                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 rounded-md transition cursor-pointer mt-2 flex justify-center items-center gap-1.5"
+                className="w-full bg-[#063b70] hover:bg-[#052d56] text-white font-medium text-sm px-4 py-2 rounded-md transition-all shadow-none cursor-pointer mt-2 flex justify-center items-center gap-1.5"
               >
-                {isRegistering ? 'Registering Patient...' : '➕ Register & Send to Waiting Queue'}
+                {isRegistering ? 'Registering Patient...' : 'Register & Send to Waiting Queue'}
               </button>
             </form>
           </div>
@@ -376,7 +372,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
           <div className="bg-white rounded-md border border-slate-200 p-5 space-y-3">
             <div className="flex justify-between items-center pb-3 border-b border-slate-200">
               <h3 className="text-base font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
-                <span>⏱️</span> Live Waiting Room Queue ({patientQueue.length})
+                Live Waiting Room Queue ({patientQueue.length})
               </h3>
               <span className="text-[10px] bg-slate-100 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-sm font-mono">
                 Click to Consult
@@ -409,7 +405,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                           </span>
                         </h4>
                         <p className="text-[11px] text-slate-500 m-0 mt-0.5">
-                          📍 {pt.locality} • <span className="font-mono text-slate-400">ID: {pt.patient_id}</span>
+                          {pt.locality} • <span className="font-mono text-slate-400">ID: {pt.patient_id}</span>
                         </p>
                       </div>
 
@@ -420,7 +416,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                             : 'bg-amber-50 text-amber-900 border-amber-200'
                         }`}
                       >
-                        {isDispensed ? '✓ DISPENSED' : 'IN QUEUE'}
+                        {isDispensed ? 'DISPENSED' : 'IN QUEUE'}
                       </span>
                     </div>
 
@@ -447,10 +443,10 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
           <div className="bg-white rounded-md border border-slate-200 p-6 space-y-5">
             {/* Active Patient Banner */}
             {selectedPatient ? (
-              <div className="bg-slate-900 text-white rounded-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="bg-[#063b70] text-white rounded-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="bg-slate-800 text-slate-200 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm font-mono border border-slate-700">
+                    <span className="bg-[#052d56] text-slate-200 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-sm font-mono border border-slate-600">
                       ACTIVE CONSULTATION
                     </span>
                     <span className="text-xs text-slate-300 font-mono">
@@ -467,8 +463,8 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                 </div>
 
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-mono bg-slate-800 text-slate-300 px-3 py-1.5 rounded-md border border-slate-700 block">
-                    👨‍⚕️ Attending: Dr. R. Sharma (DOC_01)
+                  <span className="text-xs font-mono bg-[#052d56] text-slate-200 px-3 py-1.5 rounded-md border border-slate-600 block font-semibold">
+                    Attending: Dr. R. Sharma (DOC_01)
                   </span>
                 </div>
               </div>
@@ -512,7 +508,7 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                           : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                       }`}
                     >
-                      {isAdded ? '✓ Added' : '+ ' + med.name.split(' ')[0]}
+                      {isAdded ? 'Added' : '+ ' + med.name.split(' ')[0]}
                     </button>
                   );
                 })}
@@ -561,10 +557,10 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
                         <td className="p-3 text-center">
                           <button
                             onClick={() => handleRemoveRxItem(idx)}
-                            className="text-slate-500 hover:text-rose-700 font-bold text-sm cursor-pointer p-1"
+                            className="text-slate-500 hover:text-rose-700 font-medium text-xs cursor-pointer p-1"
                             title="Remove item"
                           >
-                            🗑️
+                            Remove
                           </button>
                         </td>
                       </tr>
@@ -584,18 +580,18 @@ export default function ClinicDeskView({ activeFacility = 'PHC-042', onViewAudit
             {/* Action Bar */}
             <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="text-xs text-slate-500">
-                ⚡ Triggers automatic inventory deduction &amp; creates linked audit trail event.
+                Triggers automatic inventory deduction &amp; creates linked audit trail event.
               </div>
 
               <button
                 onClick={handleSignAndDispense}
                 disabled={isSubmittingRx || !selectedPatient || rxItems.length === 0}
-                className="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-6 py-3 rounded-md transition cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto bg-[#063b70] hover:bg-[#052d56] text-white font-medium text-sm px-4 py-2 rounded-md transition-all shadow-none cursor-pointer flex items-center justify-center gap-2"
               >
                 {isSubmittingRx ? (
                   <span>Deducting Stock &amp; Logging Ledger...</span>
                 ) : (
-                  <span>✍️ Sign &amp; Dispense Rx (Auto-Deduct Stock)</span>
+                  <span>Sign &amp; Dispense Rx (Auto-Deduct Stock)</span>
                 )}
               </button>
             </div>

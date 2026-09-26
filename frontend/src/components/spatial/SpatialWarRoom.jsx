@@ -105,7 +105,7 @@ export default function SpatialWarRoom({ activeFacility }) {
             National Health Surveillance Engine
           </span>
           <h2 className="text-2xl font-extrabold text-slate-900 m-0 tracking-tight flex items-center gap-2">
-            <span>🌍</span> Global War Room &amp; Spatial Disease Intelligence
+            Global War Room &amp; Spatial Disease Intelligence
           </h2>
           <p className="text-xs text-slate-500 m-0">
             Real-time geospatial outbreak clustering, pathogen footprint tracking, and emergency supply chain corridor routing.
@@ -117,12 +117,12 @@ export default function SpatialWarRoom({ activeFacility }) {
           <button
             onClick={fetchAnomalies}
             disabled={loading}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="bg-[#063b70] hover:bg-[#052d56] text-white font-medium text-xs px-4 py-2 rounded-md transition shadow-none cursor-pointer flex items-center gap-1.5 shrink-0"
           >
             {loading ? (
               <span>Scanning...</span>
             ) : (
-              <span>🔄 Run Spatial Scan</span>
+              <span>Run Spatial Scan</span>
             )}
           </button>
 
@@ -135,15 +135,15 @@ export default function SpatialWarRoom({ activeFacility }) {
             {seeding ? (
               <span>Seeding...</span>
             ) : (
-              <span>🧪 Seed Mock Outbreak (Andheri East)</span>
+              <span>Seed Mock Outbreak (Andheri East)</span>
             )}
           </button>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-semibold text-xs px-4 py-2 rounded-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+            className="border border-slate-300 text-slate-700 bg-white hover:bg-slate-50 font-medium text-xs px-4 py-2 rounded-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
           >
-            <span>⚡ Simulate Critical Stockout &amp; Reroute</span>
+            <span>Simulate Critical Stockout &amp; Reroute</span>
           </button>
         </div>
       </div>
@@ -154,7 +154,6 @@ export default function SpatialWarRoom({ activeFacility }) {
           {regionalEscalations.map((esc, idx) => (
             <div key={idx} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-lg">🚨</span>
                 <div>
                   <strong className="text-xs font-mono font-extrabold uppercase tracking-wider text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-sm border border-amber-300">
                     CRITICAL: Regional Epidemic Cluster Detected!
@@ -176,7 +175,7 @@ export default function SpatialWarRoom({ activeFacility }) {
 
       {errorMsg && (
         <div className="bg-rose-50 border border-rose-200 text-rose-800 p-4 rounded-md text-xs font-semibold">
-          ❌ {errorMsg}
+          {errorMsg}
         </div>
       )}
 
@@ -185,7 +184,7 @@ export default function SpatialWarRoom({ activeFacility }) {
         <div className="flex flex-wrap justify-between items-center pb-3 border-b border-slate-200 gap-2">
           <div className="flex items-center gap-2">
             <h3 className="text-base font-bold text-slate-900 m-0 uppercase tracking-wider">
-              🗺️ Geospatial Pathogen Heatmap &amp; Corridor Vector
+              Geospatial Pathogen Heatmap &amp; Corridor Vector
             </h3>
             <span className="bg-slate-100 text-slate-700 font-mono text-xs px-2.5 py-0.5 rounded-sm border border-slate-200 font-bold">
               Scan Status: Active
@@ -271,7 +270,7 @@ export default function SpatialWarRoom({ activeFacility }) {
                         <strong className="font-mono text-slate-900">{anomaly.case_count} cases</strong>
                       </div>
                       <p className="text-[10px] text-slate-600 m-0 leading-tight">
-                        💡 {anomaly.action_recommended || 'Dispatch field triage unit to inspect cluster.'}
+                        {anomaly.action_recommended || 'Dispatch field triage unit to inspect cluster.'}
                       </p>
                     </div>
                   </Popup>
@@ -300,7 +299,7 @@ export default function SpatialWarRoom({ activeFacility }) {
                 >
                   <Popup>
                     <div className="p-1 text-xs">
-                      <strong className="text-rose-900 block font-bold">🚨 Depleted Facility</strong>
+                      <strong className="text-rose-900 block font-bold">Depleted Facility</strong>
                       <span>{activeRoute.depletedFacility} ({activeRoute.depletedLocality})</span>
                       <span className="text-[10px] block text-slate-500 font-mono mt-1">Needed: {activeRoute.neededMedicine}</span>
                     </div>
@@ -315,7 +314,7 @@ export default function SpatialWarRoom({ activeFacility }) {
                 >
                   <Popup>
                     <div className="p-1 text-xs">
-                      <strong className="text-emerald-900 block font-bold">🚑 Surplus Stock Donor</strong>
+                      <strong className="text-emerald-900 block font-bold">Surplus Stock Donor</strong>
                       <span>{activeRoute.redirect_to_facility || 'PHC-002 (Bandra West)'}</span>
                       <span className="text-[10px] block text-emerald-800 font-mono font-bold mt-1">
                         Surplus: {activeRoute.available_stock || 180} units
@@ -332,11 +331,11 @@ export default function SpatialWarRoom({ activeFacility }) {
         {activeRoute && (
           <div className="bg-slate-50 border border-slate-200 rounded-md p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="space-y-1">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white px-2 py-0.5 rounded-sm font-mono">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-[#063b70] text-white px-2 py-0.5 rounded-sm font-mono">
                 Active Transit Vector Plotted
               </span>
               <h4 className="text-xs font-bold text-slate-900 m-0 flex items-center gap-2">
-                <span>🚑</span> Redirecting Stock from <strong className="text-slate-900">{activeRoute.redirect_to_facility}</strong> to <strong className="text-slate-900">{activeRoute.depletedFacility}</strong>
+                Redirecting Stock from <strong className="text-slate-900">{activeRoute.redirect_to_facility}</strong> to <strong className="text-slate-900">{activeRoute.depletedFacility}</strong>
               </h4>
               <p className="text-xs text-slate-600 m-0">
                 Transit Distance: <strong className="font-mono text-slate-900">{activeRoute.distance_text || '6.8 km'}</strong> • Live Traffic ETA: <strong className="font-mono text-slate-900">{activeRoute.driving_time_mins || 16} mins</strong>
@@ -347,7 +346,7 @@ export default function SpatialWarRoom({ activeFacility }) {
               onClick={() => setActiveRoute(null)}
               className="text-xs text-slate-700 hover:text-slate-900 underline font-semibold cursor-pointer shrink-0"
             >
-              Clear Route Overlay ✕
+              Clear Route Overlay
             </button>
           </div>
         )}
@@ -357,7 +356,7 @@ export default function SpatialWarRoom({ activeFacility }) {
       <div className="bg-white border-t border-slate-200 pt-6 space-y-4">
         <div className="flex justify-between items-center pb-3 border-b border-slate-200">
           <h3 className="text-base font-bold text-slate-900 m-0 uppercase tracking-wider flex items-center gap-2">
-            <span>📋</span> Spatial Anomaly Registry: <span className="text-slate-900 font-extrabold">{activeAnomalies.length} Clusters Detected</span>
+            Spatial Anomaly Registry: <span className="text-slate-900 font-extrabold">{activeAnomalies.length} Clusters Detected</span>
           </h3>
 
           <span className="bg-slate-100 text-slate-700 font-mono text-xs px-3 py-1 rounded-sm border border-slate-200 font-semibold">

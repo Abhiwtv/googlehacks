@@ -43,19 +43,18 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
       <div className="bg-white rounded-md border border-slate-200 shadow-xl max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="bg-slate-900 text-white p-4 flex justify-between items-center border-b border-slate-800">
+        <div className="bg-[#063b70] text-white p-4 flex justify-between items-center border-b border-slate-800">
           <div className="flex items-center gap-2">
-            <span className="text-amber-400 text-lg">⚡</span>
             <div>
               <h3 className="font-bold text-sm m-0 tracking-tight">Critical Stockout &amp; Live Emergency Rerouting</h3>
-              <p className="text-[11px] text-slate-400 m-0">Automated Spatial Dispatch &amp; Surplus Stock Diversion Engine</p>
+              <p className="text-[11px] text-slate-300 m-0">Automated Spatial Dispatch &amp; Surplus Stock Diversion Engine</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white text-lg font-bold cursor-pointer p-1 rounded-md hover:bg-slate-800"
+            className="text-slate-300 hover:text-white text-xs font-bold cursor-pointer p-1 rounded-md hover:bg-[#052d56]"
           >
-            ✕
+            Close
           </button>
         </div>
 
@@ -115,7 +114,7 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs py-2.5 rounded-md transition cursor-pointer flex items-center justify-center gap-2"
+            className="w-full bg-[#063b70] hover:bg-[#052d56] text-white font-medium text-sm px-4 py-2 rounded-md transition-all shadow-none cursor-pointer flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
@@ -126,13 +125,13 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
                 <span>Calculating Live Transit Matrix...</span>
               </>
             ) : (
-              <span>⚡ Find Surplus Stock &amp; Plot Emergency Corridor</span>
+              <span>Find Surplus Stock &amp; Plot Emergency Corridor</span>
             )}
           </button>
 
           {errorMsg && (
             <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs rounded-md font-semibold">
-              ⚠️ {errorMsg}
+              {errorMsg}
             </div>
           )}
 
@@ -150,7 +149,6 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
 
               <div className="space-y-1.5 text-xs text-slate-800">
                 <div className="flex items-center gap-2 font-semibold">
-                  <span>🚑</span>
                   <span>Redirect to Facility:</span>
                   <strong className="text-emerald-900 font-bold underline">
                     {routeResult.redirect_to_facility || 'PHC-002 (Bandra West)'}
@@ -158,7 +156,6 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span>⏱️</span>
                   <span>Driving Duration:</span>
                   <strong className="text-slate-900 font-mono">
                     {routeResult.driving_time_mins || 16} mins
@@ -167,7 +164,6 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span>📏</span>
                   <span>Transit Distance:</span>
                   <strong className="text-slate-900 font-mono">
                     {routeResult.distance_text || '6.8 km'}
@@ -176,7 +172,7 @@ export default function LogisticsModal({ isOpen, onClose, onRouteCalculated }) {
               </div>
 
               <p className="text-[11px] text-emerald-900 m-0 pt-1 font-medium italic border-t border-emerald-200">
-                ✓ Route polyline projected onto spatial map viewport. Emergency transit advisory dispatched to dispatch desk.
+                Route polyline projected onto spatial map viewport. Emergency transit advisory dispatched to dispatch desk.
               </p>
             </div>
           )}

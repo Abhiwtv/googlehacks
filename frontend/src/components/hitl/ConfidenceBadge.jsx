@@ -6,27 +6,27 @@ export default function ConfidenceBadge({ confidenceScore = 0.95, requiresHumanR
   const isMedium = percent >= 75 && percent < 90;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2 font-mono">
       {/* Confidence Score Pill */}
-      <div className={`px-2.5 py-1 rounded-full text-xs font-bold flex items-center gap-1.5 border shadow-2xs ${
+      <div className={`px-2.5 py-1 rounded-sm text-xs font-bold flex items-center gap-1.5 border ${
         isHigh
-          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+          ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
           : isMedium
-          ? 'bg-amber-50 text-amber-900 border-amber-300'
-          : 'bg-rose-50 text-rose-900 border-rose-300'
+          ? 'bg-amber-50 text-amber-900 border-amber-200'
+          : 'bg-rose-50 text-rose-900 border-rose-200'
       }`}>
-        <span className={`w-2 h-2 rounded-full ${isHigh ? 'bg-emerald-500' : isMedium ? 'bg-amber-500' : 'bg-rose-500 animate-pulse'}`}></span>
+        <span className={`w-2 h-2 rounded-full ${isHigh ? 'bg-emerald-600' : isMedium ? 'bg-amber-600' : 'bg-rose-600'}`}></span>
         <span>OCR Confidence: <strong>{percent}%</strong></span>
       </div>
 
       {/* Review Required Pill */}
       {requiresHumanReview ? (
-        <span className="bg-amber-500 text-slate-950 font-extrabold text-[11px] px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-xs animate-bounce">
-          ⚠️ Human Verification Required
+        <span className="bg-amber-50 text-amber-900 border border-amber-200 font-bold text-xs px-2.5 py-1 rounded-sm uppercase tracking-wider">
+          Human Verification Required
         </span>
       ) : (
-        <span className="bg-blue-50 text-blue-800 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200">
-          ✓ Automated Pass
+        <span className="bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-2.5 py-1 rounded-sm uppercase tracking-wider">
+          Automated Pass
         </span>
       )}
     </div>
