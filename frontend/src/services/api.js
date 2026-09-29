@@ -5,7 +5,7 @@
  */
 import { auth } from './firebase';
 
-const API_BASE = import.meta.env.API_BASE_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || '';
 
 /**
  * Helper function to inject Firebase JWT into API requests
