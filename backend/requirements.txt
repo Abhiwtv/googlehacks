@@ -8,3 +8,4 @@ vertexai
 python-multipart
 Pillow
 aiosqlite
+googlemaps
