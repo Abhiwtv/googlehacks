@@ -1,7 +1,8 @@
 fastapi
-uvicorn
+uvicorn[standard]
 pydantic
-google-cloud-documentai
+sqlalchemy
 google-genai
+google-cloud-bigquery
+vertexai
 python-multipart
-firebase-admin
