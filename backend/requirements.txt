@@ -6,3 +6,5 @@ google-genai
 google-cloud-bigquery
 vertexai
 python-multipart
+Pillow
+aiosqlite
