@@ -1,7 +1,7 @@
 fastapi
 uvicorn[standard]
 pydantic
-sqlalchemy
+SQLAlchemy[asyncio]>=2.0,<3.0
 google-genai
 google-cloud-bigquery
 vertexai
